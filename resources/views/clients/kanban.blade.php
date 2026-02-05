@@ -19,11 +19,12 @@
 
     <div class="h-[calc(100vh-12rem)] overflow-x-auto overflow-y-hidden" x-data="{
         updateTaskStatus(taskId, status) {
+            const tokenMeta = document.querySelector('meta[name=csrf-token]');
             fetch(`/tasks/${taskId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                    'X-CSRF-TOKEN': tokenMeta ? tokenMeta.content : '',
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({ 
@@ -31,9 +32,15 @@
                     status: status 
                 })
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Task updated:', data);
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    return response.json().then(data => {
+                        console.error('Update failed:', data);
+                        alert('Failed to update task status');
+                    });
+                }
             })
             .catch(error => {
                 console.error('Error:', error);

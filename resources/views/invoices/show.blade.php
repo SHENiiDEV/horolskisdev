@@ -120,9 +120,9 @@
                         <p class="font-bold text-gray-900 text-lg">Mihails Horoļskis</p>
                         <div class="text-gray-500 text-sm mt-2 leading-relaxed">
                             Lepju iela 9-45<br>
-                            Riga, Latvia, LV-1016<br>
-                            PK: 221194-10523<br>
-                            info@horolskis.lv
+                            Riga, LV-1016<br>
+                            {{ __('invoice.latvia') }}<br>
+                            PK: 221194-10523
                         </div>
                     </div>
 

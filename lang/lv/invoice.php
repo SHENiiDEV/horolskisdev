@@ -24,4 +24,5 @@ return [
     'website' => 'Mājaslapa',
     'developer' => 'Izstrādātājs',
     'fixed' => 'Fiksēts',
+    'latvia' => 'Latvija',
 ];

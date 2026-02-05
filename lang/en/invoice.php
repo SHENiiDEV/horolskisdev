@@ -24,4 +24,5 @@ return [
     'website' => 'Website',
     'developer' => 'Developer',
     'fixed' => 'Fixed',
+    'latvia' => 'Latvia',
 ];
