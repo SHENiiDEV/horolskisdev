@@ -22,4 +22,6 @@ return [
     'payment_due' => 'Payment is due within 14 days of the invoice date.',
     'project' => 'Project',
     'website' => 'Website',
+    'developer' => 'Developer',
+    'fixed' => 'Fixed',
 ];

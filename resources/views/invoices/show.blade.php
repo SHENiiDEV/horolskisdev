@@ -58,15 +58,20 @@
         <div class="h-2 bg-gradient-to-r from-gray-900 to-gray-700"></div>
 
         <div class="p-12">
+            @php \Carbon\Carbon::setLocale($invoice->language); @endphp
             <!-- Header -->
             <div class="flex justify-between items-start mb-16">
                 <div>
                     <!-- Brand -->
                     <h1 class="text-4xl font-black tracking-tight text-gray-900">HOROLSKIS</h1>
-                    <p class="text-sm text-gray-500 mt-1 uppercase tracking-widest font-medium">Developer</p>
+                    <p class="text-sm text-gray-500 mt-1 uppercase tracking-widest font-medium">
+                        {{ __('invoice.developer') }}
+                    </p>
                 </div>
                 <div class="text-right">
-                    <h2 class="text-base font-semibold text-gray-400 uppercase tracking-widest mb-2">Invoice</h2>
+                    <h2 class="text-base font-semibold text-gray-400 uppercase tracking-widest mb-2">
+                        {{ __('invoice.invoice') }}
+                    </h2>
                     <p class="text-4xl font-light text-gray-900">
                         #{{ $invoice->public_id ?? str_pad($invoice->id, 5, '0', STR_PAD_LEFT) }}</p>
                     <div class="mt-4 flex justify-end">
@@ -104,9 +109,10 @@
             </div>
 
             <!-- Addresses & Meta -->
-            <!-- Addresses & Meta -->
-            <div class="grid grid-cols-2 gap-12 mb-16 border-b border-gray-100 pb-12">
-                <div class="space-y-10">
+            <div class="mb-12 border-b border-gray-100 pb-12">
+                <!-- Row 1: Addresses Side by Side -->
+                <div class="grid grid-cols-2 gap-12 mb-12">
+                    <!-- Paid To (Left) -->
                     <div>
                         <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
                             {{ __('invoice.paid_to') }}
@@ -120,7 +126,8 @@
                         </div>
                     </div>
 
-                    <div>
+                    <!-- Billed To (Right) -->
+                    <div class="text-right">
                         <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
                             {{ __('invoice.billed_to') }}
                         </h3>
@@ -141,21 +148,23 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 gap-6 content-start">
-                    <div>
+                <!-- Row 2: Dates (Bottom) -->
+                <div class="grid grid-cols-2 gap-12 pt-8 border-t border-gray-50">
+                    <div class="text-left">
                         <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
                             {{ __('invoice.issue_date') }}
                         </h3>
-                        <p class="font-medium text-sm text-gray-900">{{ $invoice->created_at->format('M d, Y') }}
+                        <p class="font-medium text-sm text-gray-900 first-letter:uppercase">
+                            {{ $invoice->created_at->translatedFormat('M d, Y') }}
                         </p>
                     </div>
-                    <div>
+                    <div class="text-right">
                         <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
                             {{ __('invoice.billing_period') }}
                         </h3>
-                        <p class="font-medium text-sm text-gray-900 whitespace-nowrap">
-                            {{ \Carbon\Carbon::parse($invoice->period_start)->format('M d') }} —
-                            {{ \Carbon\Carbon::parse($invoice->period_end)->format('M d, Y') }}
+                        <p class="font-medium text-sm text-gray-900 whitespace-nowrap first-letter:uppercase">
+                            {{ \Carbon\Carbon::parse($invoice->period_start)->translatedFormat('M d') }} —
+                            {{ \Carbon\Carbon::parse($invoice->period_end)->translatedFormat('M d, Y') }}
                         </p>
                     </div>
                 </div>
@@ -164,7 +173,7 @@
 
         <!-- Content Area -->
         <div class="mb-12">
-            <h3 class="text-xl font-bold text-gray-900 mb-6">Services Breakdown</h3>
+            <h3 class="text-xl font-bold text-gray-900 mb-6">{{ __('invoice.services_breakdown') }}</h3>
 
             @if($invoice->notes)
                 <div class="bg-gray-50 rounded-lg p-4 mb-8 text-sm text-gray-600 leading-relaxed border border-gray-100">
@@ -223,7 +232,7 @@
                                         € {{ number_format($task->rate, 2) }}
                                     @else
                                         <span
-                                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100/10 text-gray-600">Fixed</span>
+                                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100/10 text-gray-600">{{ __('invoice.fixed') }}</span>
                                     @endif
                                 </td>
                                 <td

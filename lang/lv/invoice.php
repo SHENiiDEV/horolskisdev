@@ -22,4 +22,6 @@ return [
     'payment_due' => 'Apmaksas termiņš ir 14 dienas no rēķina izrakstīšanas datuma.',
     'project' => 'Projekts',
     'website' => 'Mājaslapa',
+    'developer' => 'Izstrādātājs',
+    'fixed' => 'Fiksēts',
 ];
