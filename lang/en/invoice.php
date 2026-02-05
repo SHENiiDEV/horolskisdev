@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'invoice' => 'Invoice',
+    'draft' => 'Draft',
+    'sent' => 'Sent',
+    'paid' => 'Paid',
+    'paid_to' => 'Paid To',
+    'issue_date' => 'Issue Date',
+    'billing_period' => 'Billing Period',
+    'billed_to' => 'Billed To',
+    'services_breakdown' => 'Services Breakdown',
+    'description' => 'Description',
+    'hours_qty' => 'Hours / Qty',
+    'rate' => 'Rate',
+    'amount' => 'Amount',
+    'total_amount' => 'Total Amount',
+    'receiver' => 'Receiver',
+    'iban' => 'IBAN',
+    'payment_details' => 'Payment Details / Mērķis',
+    'payment_purpose' => 'Payment for invoice',
+    'payment_due' => 'Payment is due within 14 days of the invoice date.',
+    'project' => 'Project',
+    'website' => 'Website',
+];

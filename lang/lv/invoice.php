@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'invoice' => 'Rēķins',
+    'draft' => 'Melnraksts',
+    'sent' => 'Nosūtīts',
+    'paid' => 'Apmaksāts',
+    'paid_to' => 'Maksājuma Saņēmējs',
+    'issue_date' => 'Izrakstīšanas Datums',
+    'billing_period' => 'Rēķina Periods',
+    'billed_to' => 'Maksātājs',
+    'services_breakdown' => 'Pakalpojumu Apraksts',
+    'description' => 'Apraksts',
+    'hours_qty' => 'Stundas / Skaits',
+    'rate' => 'Likme',
+    'amount' => 'Summa',
+    'total_amount' => 'Kopsumma',
+    'receiver' => 'Saņēmējs',
+    'iban' => 'IBAN',
+    'payment_details' => 'Maksājuma Detaļas / Mērķis',
+    'payment_purpose' => 'Apmaksa par rēķinu',
+    'payment_due' => 'Apmaksas termiņš ir 14 dienas no rēķina izrakstīšanas datuma.',
+    'project' => 'Projekts',
+    'website' => 'Mājaslapa',
+];
