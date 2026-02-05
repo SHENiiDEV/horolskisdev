@@ -42,6 +42,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/timer/stop', [\App\Http\Controllers\TimeEntryController::class, 'stop'])->name('timer.stop');
 
     Route::post('/invoices/{id}/restore', [\App\Http\Controllers\InvoiceController::class, 'restore'])->name('invoices.restore');
+
+    // Global Search
+    Route::get('/search', [\App\Http\Controllers\SearchController::class, 'index'])->name('search');
 });
 Route::post('/telegram/webhook', [\App\Http\Controllers\TelegramController::class, 'handleWebhook'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 // require __DIR__ . '/auth.php';
