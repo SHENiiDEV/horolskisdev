@@ -19,11 +19,11 @@ Route::get('/', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::middleware(['auth', 'admin'])->group(function () {
-        Route::get('clients/{client}/kanban', [\App\Http\Controllers\TaskController::class, 'clientKanban'])->name('clients.kanban');
         Route::resource('clients', ClientController::class);
         Route::resource('users', \App\Http\Controllers\UserController::class);
     });
 
+    Route::get('clients/{client}/kanban', [\App\Http\Controllers\TaskController::class, 'clientKanban'])->name('clients.kanban');
     Route::resource('projects', \App\Http\Controllers\ProjectController::class);
     Route::get('/invoices/create-from-tasks', [\App\Http\Controllers\InvoiceController::class, 'createFromTasks'])->name('invoices.create-from-tasks');
     Route::resource('invoices', \App\Http\Controllers\InvoiceController::class);

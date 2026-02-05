@@ -20,13 +20,16 @@
     <div class="h-[calc(100vh-12rem)] overflow-x-auto overflow-y-hidden" x-data="{
         updateTaskStatus(taskId, status) {
             fetch(`/tasks/${taskId}`, {
-                method: 'PUT',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ status: status })
+                body: JSON.stringify({ 
+                    _method: 'PUT',
+                    status: status 
+                })
             })
             .then(response => response.json())
             .then(data => {

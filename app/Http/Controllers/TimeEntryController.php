@@ -59,8 +59,9 @@ class TimeEntryController extends Controller
         return view('time-entries.index', compact('entries'));
     }
 
-    public function update(Request $request, \App\Models\TimeEntry $timeEntry)
+    public function update(Request $request, $id)
     {
+        $timeEntry = \App\Models\TimeEntry::findOrFail($id);
         if ($timeEntry->user_id !== auth()->id() && !auth()->user()->isAdmin()) {
             abort(403);
         }

@@ -2,6 +2,8 @@
 
 Typically used for freelance developers or small agencies to manage clients, projects, tasks, time tracking, and invoicing.
 
+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
+
 ## 🚀 Features
 
 ### 👥 Client & Project Management
