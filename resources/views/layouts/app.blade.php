@@ -118,8 +118,30 @@
                 </button>
 
                 <!-- Search Bar -->
-                <div class="flex items-center px-4">
-                    <div class="w-full max-w-xs">
+                <div class="flex items-center px-4" x-data="{
+                    query: '{{ request('query') }}',
+                    results: null,
+                    open: false,
+                    search() {
+                        if (this.query.length < 2) {
+                            this.results = null;
+                            this.open = false;
+                            return;
+                        }
+                        fetch('{{ route('search') }}?query=' + encodeURIComponent(this.query), {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json',
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            this.results = data;
+                            this.open = true;
+                        });
+                    }
+                }" @click.away="open = false">
+                    <div class="w-full max-w-xs relative">
                         <label for="search" class="sr-only">Search</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -129,11 +151,125 @@
                                         clip-rule="evenodd" />
                                 </svg>
                             </div>
-                            <form action="{{ route('search') }}" method="GET">
-                                <input id="search" name="query"
+                            <form action="{{ route('search') }}" method="GET" @submit.prevent>
+                                <input x-model="query" @input.debounce.300ms="search()"
+                                    @focus="if(query.length >= 2) search()" id="search" name="query"
                                     class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:border-indigo-500 focus:shadow-outline-indigo sm:text-sm transition duration-150 ease-in-out"
-                                    placeholder="Search..." type="search" value="{{ request('query') }}">
+                                    placeholder="Search..." type="search" autocomplete="off">
                             </form>
+                        </div>
+
+                        <!-- Live Search Results Dropdown -->
+                        <div x-show="open && results"
+                            class="absolute mt-2 w-96 bg-white rounded-md shadow-lg z-50 overflow-hidden border border-gray-200"
+                            style="display: none;" x-transition:enter="transition ease-out duration-100"
+                            x-transition:enter-start="opacity-0 scale-95"
+                            x-transition:enter-end="opacity-100 scale-100">
+
+                            <!-- Tasks -->
+                            <template x-if="results && results.tasks && results.tasks.length > 0">
+                                <div>
+                                    <div
+                                        class="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                        Tasks
+                                    </div>
+                                    <ul class="divide-y divide-gray-100">
+                                        <template x-for="task in results.tasks" :key="task.id">
+                                            <li>
+                                                <a :href="'/tasks/' + task.id"
+                                                    class="block px-4 py-3 hover:bg-gray-50 transition duration-150 ease-in-out">
+                                                    <div class="flex items-center justify-between">
+                                                        <p class="text-sm font-medium text-indigo-600 truncate"
+                                                            x-text="task.title"></p>
+                                                        <span
+                                                            :class="{'bg-green-100 text-green-800': task.status === 'completed', 'bg-yellow-100 text-yellow-800': task.status !== 'completed'}"
+                                                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                                            x-text="task.status"></span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+
+                            <!-- Projects -->
+                            <template x-if="results && results.projects && results.projects.length > 0">
+                                <div>
+                                    <div
+                                        class="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider border-t border-gray-100">
+                                        Projects
+                                    </div>
+                                    <ul class="divide-y divide-gray-100">
+                                        <template x-for="project in results.projects" :key="project.id">
+                                            <li>
+                                                <a :href="'/projects/' + project.id"
+                                                    class="block px-4 py-3 hover:bg-gray-50 transition duration-150 ease-in-out">
+                                                    <p class="text-sm font-medium text-indigo-600 truncate"
+                                                        x-text="project.name"></p>
+                                                </a>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+
+                            <!-- Clients -->
+                            <template x-if="results && results.clients && results.clients.length > 0">
+                                <div>
+                                    <div
+                                        class="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider border-t border-gray-100">
+                                        Clients
+                                    </div>
+                                    <ul class="divide-y divide-gray-100">
+                                        <template x-for="client in results.clients" :key="client.id">
+                                            <li>
+                                                <a :href="'/clients/' + client.id"
+                                                    class="block px-4 py-3 hover:bg-gray-50 transition duration-150 ease-in-out">
+                                                    <p class="text-sm font-medium text-indigo-600 truncate"
+                                                        x-text="client.name"></p>
+                                                    <p class="text-xs text-gray-500 truncate" x-text="client.email"></p>
+                                                </a>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+
+                            <!-- Invoices -->
+                            <template x-if="results && results.invoices && results.invoices.length > 0">
+                                <div>
+                                    <div
+                                        class="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider border-t border-gray-100">
+                                        Invoices
+                                    </div>
+                                    <ul class="divide-y divide-gray-100">
+                                        <template x-for="invoice in results.invoices" :key="invoice.id">
+                                            <li>
+                                                <a :href="'/invoices/' + invoice.id"
+                                                    class="block px-4 py-3 hover:bg-gray-50 transition duration-150 ease-in-out">
+                                                    <div class="flex items-center justify-between">
+                                                        <p class="text-sm font-medium text-indigo-600 truncate">
+                                                            Invoice #<span
+                                                                x-text="invoice.public_id || invoice.id"></span>
+                                                        </p>
+                                                        <span
+                                                            :class="{'bg-green-100 text-green-800': invoice.status === 'paid', 'bg-blue-100 text-blue-800': invoice.status === 'sent', 'bg-gray-100 text-gray-800': invoice.status === 'draft'}"
+                                                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                                            x-text="invoice.status"></span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+
+                            <!-- No Results -->
+                            <div x-show="results && Object.values(results).every(arr => arr.length === 0)"
+                                class="px-4 py-3 text-sm text-gray-500">
+                                No results found.
+                            </div>
                         </div>
                     </div>
                 </div>

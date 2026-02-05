@@ -30,7 +30,7 @@ class SearchController extends Controller
             ->get();
 
         $projects = Project::where('name', 'like', "%{$query}%")
-            ->orWhere('description', 'like', "%{$query}%")
+            ->orWhere('domain', 'like', "%{$query}%")
             ->limit(10)
             ->get();
 
@@ -45,6 +45,15 @@ class SearchController extends Controller
             ->orWhere('status', 'like', "%{$query}%")
             ->limit(10)
             ->get();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'tasks' => $tasks,
+                'projects' => $projects,
+                'clients' => $clients,
+                'invoices' => $invoices,
+            ]);
+        }
 
         return view('search.results', compact('tasks', 'projects', 'clients', 'invoices', 'query'));
     }
