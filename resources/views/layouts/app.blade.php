@@ -141,7 +141,7 @@
                         });
                     }
                 }" @click.away="open = false">
-                    <div class="w-full max-w-xs relative">
+                    <div class="w-full max-w-xl relative">
                         <label for="search" class="sr-only">Search</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

@@ -86,16 +86,22 @@ class TaskController extends Controller
         }
 
         $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'status' => 'required|in:pending,in_progress,done',
+            'pricing_type' => 'required|in:hourly,fixed',
+            'rate' => 'nullable|numeric|min:0',
+            'currency' => 'required|string|size:3',
+            'estimated_hours' => 'nullable|numeric|min:0',
         ]);
 
         $task->update($validated);
 
         if ($request->wantsJson()) {
-            return response()->json(['message' => 'Task status updated.', 'task' => $task]);
+            return response()->json(['message' => 'Task updated.', 'task' => $task]);
         }
 
-        return back()->with('success', 'Task status updated.');
+        return redirect()->route('tasks.show', $task)->with('success', 'Task updated successfully.');
     }
 
     /**
@@ -106,7 +112,7 @@ class TaskController extends Controller
         if (auth()->user()->isClient() && $task->project->client_id !== auth()->user()->client_id) {
             abort(403);
         }
-        //
+        return view('tasks.show', compact('task'));
     }
 
     /**
@@ -129,6 +135,6 @@ class TaskController extends Controller
             abort(403);
         }
         $task->delete();
-        return back()->with('success', 'Task deleted successfully.');
+        return redirect()->route('projects.show', $task->project_id)->with('success', 'Task deleted successfully.');
     }
 }
