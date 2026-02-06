@@ -55,7 +55,7 @@ class TaskController extends Controller
         return view('tasks.create', compact('project'));
     }
 
-    public function store(\Illuminate\Http\Request $request)
+    public function store(\Illuminate\Http\Request $request, \App\Services\TelegramService $telegram)
     {
         $validated = $request->validate([
             'project_id' => 'required|exists:projects,id',
@@ -73,7 +73,22 @@ class TaskController extends Controller
             abort(403);
         }
 
-        \App\Models\Task::create($validated);
+        $task = \App\Models\Task::create($validated);
+
+        // Notify Admin via Telegram if created by Client
+        if (auth()->user()->isClient()) {
+            $clientName = auth()->user()->name; // Assuming User model has name
+            $projectName = $project->name;
+            $taskTitle = $task->title;
+
+            $message = "🆕 <b>New Task Created</b>\n\n" .
+                "👤 <b>Client:</b> {$clientName}\n" .
+                "📂 <b>Project:</b> {$projectName}\n" .
+                "📝 <b>Task:</b> {$taskTitle}\n" .
+                "🔗 <a href='" . route('tasks.show', $task->id) . "'>View Task</a>";
+
+            $telegram->sendMessage($message);
+        }
 
         return redirect()->route('projects.show', ['project' => $validated['project_id']])
             ->with('success', 'Task created successfully.');
