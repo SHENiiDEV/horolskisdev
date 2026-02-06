@@ -86,12 +86,12 @@ class TaskController extends Controller
         }
 
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
             'status' => 'required|in:pending,in_progress,done',
-            'pricing_type' => 'required|in:hourly,fixed',
+            'pricing_type' => 'sometimes|required|in:hourly,fixed',
             'rate' => 'nullable|numeric|min:0',
-            'currency' => 'required|string|size:3',
+            'currency' => 'sometimes|required|string|size:3',
             'estimated_hours' => 'nullable|numeric|min:0',
         ]);
 
