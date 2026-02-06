@@ -61,6 +61,35 @@ class ReportsController extends Controller
             ->orderByRaw('FIELD(day, "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")')
             ->get();
 
+        // 4. Task Financials
+        $tasksData = \App\Models\Task::with('timeEntries')->get();
+
+        $doneCount = 0;
+        $doneValue = 0;
+        $potentialCount = 0;
+        $potentialValue = 0;
+
+        foreach ($tasksData as $task) {
+            if ($task->status === 'done') {
+                $doneCount++;
+                if ($task->pricing_type === 'fixed') {
+                    $doneValue += $task->rate;
+                } else {
+                    // For hourly, use actual tracked time
+                    $hours = $task->timeEntries->sum('duration') / 3600;
+                    $doneValue += $task->rate * $hours;
+                }
+            } else {
+                $potentialCount++;
+                if ($task->pricing_type === 'fixed') {
+                    $potentialValue += $task->rate;
+                } else {
+                    // For pending/in_progress, use estimated hours
+                    $potentialValue += $task->rate * $task->estimated_hours;
+                }
+            }
+        }
+
         return response()->json([
             'income' => [
                 'labels' => $months,
@@ -73,6 +102,12 @@ class ReportsController extends Controller
             'days' => [
                 'labels' => $daysData->pluck('day'),
                 'data' => $daysData->pluck('count')
+            ],
+            'tasks' => [
+                'done_count' => $doneCount,
+                'done_value' => round($doneValue, 2),
+                'potential_count' => $potentialCount,
+                'potential_value' => round($potentialValue, 2)
             ]
         ]);
     }

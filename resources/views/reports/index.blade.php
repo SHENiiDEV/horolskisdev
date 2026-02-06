@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="py-12" x-data="{
-        stats: { income: 0, hours: 0, active_projects: 0 },
+        stats: { income: 0, hours: 0, active_projects: 0, done_value: 0, done_count: 0, potential_value: 0, potential_count: 0 },
         init() {
             fetch('{{ route('reports.data') }}')
                 .then(response => response.json())
@@ -15,6 +15,11 @@
                     this.stats.income = data.income.data.reduce((a, b) => parseFloat(a) + parseFloat(b), 0).toFixed(2);
                     this.stats.hours = data.projects.data.reduce((a, b) => parseFloat(a) + parseFloat(b), 0).toFixed(1);
                     this.stats.active_projects = data.projects.labels.length;
+                    
+                    this.stats.done_value = data.tasks.done_value;
+                    this.stats.done_count = data.tasks.done_count;
+                    this.stats.potential_value = data.tasks.potential_value;
+                    this.stats.potential_count = data.tasks.potential_count;
 
                     // Initialize Charts
                     this.initIncomeChart(data.income);
@@ -126,7 +131,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
             <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                 <!-- Total Income -->
                 <div
                     class="bg-white overflow-hidden shadow-sm sm:rounded-xl p-6 border-l-4 border-indigo-500 flex items-center justify-between">
@@ -168,6 +173,40 @@
                         <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Completed Tasks Value -->
+                <div
+                    class="bg-white overflow-hidden shadow-sm sm:rounded-xl p-6 border-l-4 border-teal-500 flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Completed Work</p>
+                        <h3 class="text-2xl font-bold text-gray-900 mt-1">€<span x-text="stats.done_value"></span></h3>
+                        <p class="text-xs text-gray-400 mt-1"><span x-text="stats.done_count"></span> tasks finished</p>
+                    </div>
+                    <div class="p-3 bg-teal-50 rounded-lg text-teal-600">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Potential Earnings -->
+                <div
+                    class="bg-white overflow-hidden shadow-sm sm:rounded-xl p-6 border-l-4 border-purple-500 flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Potential Earnings</p>
+                        <h3 class="text-2xl font-bold text-gray-900 mt-1">€<span x-text="stats.potential_value"></span>
+                        </h3>
+                        <p class="text-xs text-gray-400 mt-1"><span x-text="stats.potential_count"></span> tasks pending
+                        </p>
+                    </div>
+                    <div class="p-3 bg-purple-50 rounded-lg text-purple-600">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                         </svg>
                     </div>
                 </div>
