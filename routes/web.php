@@ -29,6 +29,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('invoices', \App\Http\Controllers\InvoiceController::class);
     Route::post('/integrations', [\App\Http\Controllers\IntegrationController::class, 'store'])->name('integrations.store');
     Route::delete('/integrations/{integration}', [\App\Http\Controllers\IntegrationController::class, 'destroy'])->name('integrations.destroy');
+    Route::get('/integrations/{integration}/download', [\App\Http\Controllers\IntegrationController::class, 'download'])->name('integrations.download');
 
     // Telegram
     Route::get('/telegram', [\App\Http\Controllers\TelegramController::class, 'index'])->name('telegram.index');

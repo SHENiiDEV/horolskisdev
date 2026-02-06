@@ -39,4 +39,13 @@ class IntegrationController extends Controller
 
         return back()->with('success', 'Integration deleted successfully.');
     }
+
+    public function download(\App\Models\ProjectIntegration $integration)
+    {
+        if (!\Illuminate\Support\Facades\Storage::disk('public')->exists($integration->file_path)) {
+            abort(404, 'File not found.');
+        }
+
+        return \Illuminate\Support\Facades\Storage::disk('public')->download($integration->file_path, $integration->name . '.' . pathinfo($integration->file_path, PATHINFO_EXTENSION));
+    }
 }

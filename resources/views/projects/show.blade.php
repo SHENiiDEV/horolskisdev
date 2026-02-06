@@ -488,7 +488,7 @@
                                                 </div>
                                             </div>
                                             <div class="flex space-x-2">
-                                                <a href="{{ Storage::url($integration->file_path) }}" download
+                                                <a href="{{ route('integrations.download', $integration) }}"
                                                     class="text-gray-400 hover:text-indigo-600" title="Download">
                                                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
