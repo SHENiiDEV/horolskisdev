@@ -45,6 +45,10 @@ Route::middleware('auth')->group(function () {
 
     // Global Search
     Route::get('/search', [\App\Http\Controllers\SearchController::class, 'index'])->name('search');
+
+    // Reports / Analytics
+    Route::get('/reports', [\App\Http\Controllers\ReportsController::class, 'index'])->name('reports.index');
+    Route::get('/reports/data', [\App\Http\Controllers\ReportsController::class, 'data'])->name('reports.data');
 });
 Route::post('/telegram/webhook', [\App\Http\Controllers\TelegramController::class, 'handleWebhook'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 // require __DIR__ . '/auth.php';
