@@ -33,9 +33,14 @@
                     <ul class="divide-y divide-gray-200">
                         @foreach($plugin->versions as $version)
                             <li class="py-4">
-                                <div class="flex justify-between">
+                                <div class="flex justify-between items-center">
                                     <div class="text-sm font-medium text-gray-900">{{ $version->version }}</div>
-                                    <div class="text-sm text-gray-500">{{ $version->created_at->format('M d, Y H:i') }}
+                                    <div class="flex items-center space-x-4">
+                                        <div class="text-sm text-gray-500">{{ $version->created_at->format('M d, Y H:i') }}
+                                        </div>
+                                        <a href="{{ route('plugin-versions.download', $version) }}"
+                                            class="text-indigo-600 hover:text-indigo-900 text-sm">Download<span
+                                                class="sr-only">, version {{ $version->version }}</span></a>
                                     </div>
                                 </div>
                                 @if($version->changelog)
@@ -97,16 +102,19 @@
                                     @if($plugin->latestVersion && $installedVersionId !== $plugin->latestVersion->id)
                                         <form action="{{ route('plugins.upgrade', [$project, $plugin]) }}" method="POST">
                                             @csrf
-                                            <button type="submit" class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded hover:bg-indigo-200">
+                                            <button type="submit"
+                                                class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded hover:bg-indigo-200">
                                                 Upgrade to {{ $plugin->latestVersion->version }}
                                             </button>
                                         </form>
                                     @endif
-                                    
-                                    <form action="{{ route('plugins.remove', [$project, $plugin]) }}" method="POST" onsubmit="return confirm('Are you sure?');">
+
+                                    <form action="{{ route('plugins.remove', [$project, $plugin]) }}" method="POST"
+                                        onsubmit="return confirm('Are you sure?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-xs text-red-600 hover:text-red-900">Remove</button>
+                                        <button type="submit"
+                                            class="text-xs text-red-600 hover:text-red-900">Remove</button>
                                     </form>
                                 </div>
                             </li>
@@ -120,8 +128,9 @@
                             <div class="flex gap-2">
                                 <select name="project_id" class="block w-full text-sm border-gray-300 rounded-md">
                                     @foreach(\App\Models\Project::whereDoesntHave('plugins', function ($q) use ($plugin) {
-                                        $q->where('plugin_id', $plugin->id); })->get() as $p)
-                                        <option value="{{ $p->id }}">{{ $p->name }}</option>
+                                            $q->where('plugin_id', $plugin->id);
+                                        })->get() as $p)
+                                            <option value="{{ $p->id }}">{{ $p->name }}</option>
                                     @endforeach
                                 </select>
                                 <x-primary-button>Assign</x-primary-button>

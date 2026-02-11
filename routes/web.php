@@ -53,6 +53,7 @@ Route::middleware('auth')->group(function () {
     Route::post('plugins/{plugin}/assign', [\App\Http\Controllers\PluginController::class, 'assignToProject'])->name('plugins.assign');
     Route::post('projects/{project}/plugins/{plugin}/upgrade', [\App\Http\Controllers\PluginController::class, 'upgradeProjectPlugin'])->name('plugins.upgrade');
     Route::delete('projects/{project}/plugins/{plugin}', [\App\Http\Controllers\PluginController::class, 'removeProjectPlugin'])->name('plugins.remove');
+    Route::get('/plugin-versions/{pluginVersion}/download', [\App\Http\Controllers\PluginController::class, 'downloadVersion'])->name('plugin-versions.download');
 
     // Reports / Analytics
     Route::get('/reports', [\App\Http\Controllers\ReportsController::class, 'index'])->name('reports.index');

@@ -121,4 +121,13 @@ class PluginController extends Controller
         $project->plugins()->detach($plugin->id);
         return back()->with('success', 'Plugin removed from project.');
     }
+
+    public function downloadVersion(PluginVersion $pluginVersion)
+    {
+        if (!Storage::exists($pluginVersion->file_path)) {
+            return back()->with('error', 'File not found.');
+        }
+
+        return Storage::download($pluginVersion->file_path, $pluginVersion->plugin->name . '-v' . $pluginVersion->version . '.zip');
+    }
 }
