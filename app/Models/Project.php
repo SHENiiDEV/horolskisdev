@@ -33,4 +33,11 @@ class Project extends Model
     {
         return $this->hasMany(ProjectIntegration::class);
     }
+
+    public function plugins()
+    {
+        return $this->belongsToMany(Plugin::class, 'plugin_project')
+            ->withPivot('plugin_version_id')
+            ->withTimestamps();
+    }
 }

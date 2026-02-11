@@ -1,8 +1,29 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
+        <div class="flex justify-between items-center">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ __('Dashboard') }}
+            </h2>
+            <form method="GET" action="{{ route('dashboard') }}" class="flex items-center space-x-2"
+                x-data="{ period: '{{ $period }}' }">
+                <select name="period" x-model="period" onchange="if(this.value !== 'custom') this.form.submit()"
+                    class="rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="this_month">This Month</option>
+                    <option value="last_month">Last Month</option>
+                    <option value="all_time">All Time</option>
+                    <option value="custom">Custom</option>
+                </select>
+
+                <div x-show="period === 'custom'" style="display: none;" class="flex space-x-2">
+                    <input type="date" name="date_from" value="{{ $dateFrom }}"
+                        class="rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <input type="date" name="date_to" value="{{ $dateTo }}"
+                        class="rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <button type="submit"
+                        class="px-3 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-500">Filter</button>
+                </div>
+            </form>
+        </div>
     </x-slot>
 
     <div class="py-12">
@@ -27,14 +48,19 @@
                     <p class="text-xs text-red-500">€{{ number_format($stats['unpaid_amount'], 2) }} outstanding</p>
                 </div>
                 <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-                    <dt class="truncate text-sm font-medium text-gray-500">Income (Paid)</dt>
+                    <dt class="truncate text-sm font-medium text-gray-500">Paid Tasks</dt>
                     <dd class="mt-1 text-3xl font-semibold tracking-tight text-green-600">
-                        €{{ number_format($stats['paid_income'], 2) }}</dd>
+                        €{{ number_format($stats['paid_tasks_value'], 2) }}</dd>
                 </div>
                 <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-                    <dt class="truncate text-sm font-medium text-gray-500">Completed Work (Pending)</dt>
+                    <dt class="truncate text-sm font-medium text-gray-500">Completed Tasks (Unpaid)</dt>
                     <dd class="mt-1 text-3xl font-semibold tracking-tight text-yellow-600">
-                        €{{ number_format($stats['completed_work'], 2) }}</dd>
+                        €{{ number_format($stats['completed_unpaid_tasks_value'], 2) }}</dd>
+                </div>
+                <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+                    <dt class="truncate text-sm font-medium text-gray-500">Potential Earnings</dt>
+                    <dd class="mt-1 text-3xl font-semibold tracking-tight text-indigo-600">
+                        €{{ number_format($stats['potential_earnings'], 2) }}</dd>
                 </div>
                 @if(!Auth::user()->isClient())
                     <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
