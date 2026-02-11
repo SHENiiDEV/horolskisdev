@@ -9,6 +9,12 @@ class Project extends Model
 {
     protected $guarded = [];
 
+    protected $casts = [
+        'last_check_time' => 'datetime',
+        'down_since' => 'datetime',
+        'is_monitoring_enabled' => 'boolean',
+    ];
+
     public function client()
     {
         return $this->belongsTo(Client::class);
