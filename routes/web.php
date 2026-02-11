@@ -60,7 +60,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports/data', [\App\Http\Controllers\ReportsController::class, 'data'])->name('reports.data');
 
     // Server Status
-    Route::get('/server-status', [\App\Http\Controllers\ServerStatusController::class, 'index'])->name('server-status.index');
+    Route::get('/monitors', [\App\Http\Controllers\ServerStatusController::class, 'index'])->name('server-status.index');
 });
 Route::post('/telegram/webhook', [\App\Http\Controllers\TelegramController::class, 'handleWebhook'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 // require __DIR__ . '/auth.php';
