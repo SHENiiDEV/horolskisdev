@@ -26,6 +26,47 @@
     <div class="py-12" x-data="{ tab: 'tasks' }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
+            @if($project->is_monitoring_enabled && $project->domain)
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-medium leading-6 text-gray-900">Server Status</h3>
+                            <div class="mt-2 max-w-xl text-sm text-gray-500">
+                                <p>Monitoring is enabled for <strong>{{ $project->domain }}</strong>.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="text-right">
+                                <p class="text-sm text-gray-500">Last Checked</p>
+                                <p class="text-sm font-medium text-gray-900">
+                                    {{ $project->last_check_time ? $project->last_check_time->diffForHumans() : 'Never' }}
+                                </p>
+                            </div>
+                            @if($project->last_check_status === 'up')
+                                <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
+                                    <svg class="-ml-1 mr-1.5 h-2 w-2 text-green-400" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>
+                                    UP
+                                </span>
+                            @elseif($project->last_check_status === 'down')
+                                <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-800">
+                                    <svg class="-ml-1 mr-1.5 h-2 w-2 text-red-400" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>
+                                    DOWN
+                                </span>
+                                @if($project->down_since)
+                                    <span class="text-xs text-red-600 font-medium">
+                                        for {{ $project->down_since->diffForHumans(null, true) }}
+                                    </span>
+                                @endif
+                            @else
+                                <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800">
+                                    PENDING
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <!-- Tab Navigation -->
             <div class="border-b border-gray-200 bg-white rounded-t-lg px-6 pt-4">
                 <nav class="-mb-px flex space-x-8" aria-label="Tabs">
