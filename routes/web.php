@@ -47,6 +47,13 @@ Route::middleware('auth')->group(function () {
     // Global Search
     Route::get('/search', [\App\Http\Controllers\SearchController::class, 'index'])->name('search');
 
+    // Plugins
+    Route::resource('plugins', \App\Http\Controllers\PluginController::class);
+    Route::post('plugins/{plugin}/version', [\App\Http\Controllers\PluginController::class, 'uploadVersion'])->name('plugins.uploadVersion');
+    Route::post('plugins/{plugin}/assign', [\App\Http\Controllers\PluginController::class, 'assignToProject'])->name('plugins.assign');
+    Route::post('projects/{project}/plugins/{plugin}/upgrade', [\App\Http\Controllers\PluginController::class, 'upgradeProjectPlugin'])->name('plugins.upgrade');
+    Route::delete('projects/{project}/plugins/{plugin}', [\App\Http\Controllers\PluginController::class, 'removeProjectPlugin'])->name('plugins.remove');
+
     // Reports / Analytics
     Route::get('/reports', [\App\Http\Controllers\ReportsController::class, 'index'])->name('reports.index');
     Route::get('/reports/data', [\App\Http\Controllers\ReportsController::class, 'data'])->name('reports.data');

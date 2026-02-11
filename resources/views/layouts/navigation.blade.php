@@ -32,6 +32,10 @@
                         class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('time-entries.*') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }} text-sm font-medium leading-5 transition duration-150 ease-in-out">
                         Time Tracker
                     </a>
+                    <a href="{{ route('plugins.index') }}"
+                        class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('plugins.*') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }} text-sm font-medium leading-5 transition duration-150 ease-in-out">
+                        Plugins
+                    </a>
                 </div>
             </div>
 

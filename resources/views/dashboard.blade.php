@@ -9,7 +9,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
             <!-- Stats Grid -->
-            <dl class="grid grid-cols-1 gap-5 sm:grid-cols-4">
+            <dl class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 @if(!Auth::user()->isClient())
                     <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
                         <dt class="truncate text-sm font-medium text-gray-500">Active Clients</dt>
@@ -25,6 +25,16 @@
                     <dd class="mt-1 text-3xl font-semibold tracking-tight text-red-600">{{ $stats['unpaid_invoices'] }}
                     </dd>
                     <p class="text-xs text-red-500">€{{ number_format($stats['unpaid_amount'], 2) }} outstanding</p>
+                </div>
+                <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+                    <dt class="truncate text-sm font-medium text-gray-500">Income (Paid)</dt>
+                    <dd class="mt-1 text-3xl font-semibold tracking-tight text-green-600">
+                        €{{ number_format($stats['paid_income'], 2) }}</dd>
+                </div>
+                <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+                    <dt class="truncate text-sm font-medium text-gray-500">Completed Work (Pending)</dt>
+                    <dd class="mt-1 text-3xl font-semibold tracking-tight text-yellow-600">
+                        €{{ number_format($stats['completed_work'], 2) }}</dd>
                 </div>
                 @if(!Auth::user()->isClient())
                     <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
