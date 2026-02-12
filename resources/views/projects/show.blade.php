@@ -31,37 +31,47 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <h3 class="text-lg font-medium leading-6 text-gray-900">Server Status</h3>
-                            <div class="mt-2 max-w-xl text-sm text-gray-500">
-                                <p>Monitoring is enabled for <strong>{{ $project->domain }}</strong>.</p>
+                            <div class="mt-2 text-sm text-gray-500">
+                                <p>Monitoring <strong>{{ $project->domain }}</strong></p>
                             </div>
                         </div>
-                        <div class="flex items-center space-x-4">
-                            <div class="text-right">
-                                <p class="text-sm text-gray-500">Last Checked</p>
-                                <p class="text-sm font-medium text-gray-900">
-                                    {{ $project->last_check_time ? $project->last_check_time->diffForHumans() : 'Never' }}
-                                </p>
-                            </div>
+                        <div class="flex items-center gap-x-4">
                             @if($project->last_check_status === 'up')
-                                <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
-                                    <svg class="-ml-1 mr-1.5 h-2 w-2 text-green-400" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>
-                                    UP
-                                </span>
+                                <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">UP</span>
+                                @if($project->last_check_time)
+                                    <span class="text-sm text-gray-500">Last check: {{ $project->last_check_time->diffForHumans() }}</span>
+                                @endif
                             @elseif($project->last_check_status === 'down')
-                                <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-800">
-                                    <svg class="-ml-1 mr-1.5 h-2 w-2 text-red-400" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>
-                                    DOWN
-                                </span>
+                                <span class="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">DOWN</span>
                                 @if($project->down_since)
-                                    <span class="text-xs text-red-600 font-medium">
-                                        for {{ $project->down_since->diffForHumans(null, true) }}
-                                    </span>
+                                    <span class="text-sm text-red-600 font-bold">Down for: {{ $project->down_since->diffInMinutes() }} mins</span>
                                 @endif
                             @else
-                                <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800">
-                                    PENDING
-                                </span>
+                                <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">PENDING</span>
                             @endif
+                        </div>
+                    </div>
+
+                    {{-- Uptime History Visualization --}}
+                    <div class="mt-6">
+                        <div class="flex justify-between items-end mb-1">
+                            <h4 class="text-sm font-medium text-gray-900">Uptime History (Last hour)</h4>
+                            <span class="text-xs text-gray-400">Response Time</span>
+                        </div>
+                        <div class="flex gap-1 h-12 items-end bg-gray-50 p-1 rounded-md border border-gray-100">
+                            @foreach($uptimeChecks as $check)
+                                <div class="flex-1 rounded-sm relative group {{ $check->status === 'up' ? 'bg-green-400 hover:bg-green-500' : 'bg-red-500 hover:bg-red-600' }}"
+                                     style="height: {{ $check->status === 'up' ? '100%' : '100%' }}; min-width: 4px;"
+                                     title="{{ $check->created_at->format('H:i') }} | Status: {{ strtoupper($check->status) }} | Response: {{ $check->response_time_ms ?? 'N/A' }}ms">
+                                </div>
+                            @endforeach
+                            @if($uptimeChecks->isEmpty())
+                                <div class="w-full text-center text-xs text-gray-400 py-4">No data yet</div>
+                            @endif
+                        </div>
+                        <div class="mt-1 flex justify-between text-xs text-gray-400">
+                            <span>60 mins ago</span>
+                            <span>Now</span>
                         </div>
                     </div>
                 </div>

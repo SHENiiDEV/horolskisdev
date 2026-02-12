@@ -40,6 +40,11 @@ class Project extends Model
         return $this->hasMany(ProjectIntegration::class);
     }
 
+    public function uptimeChecks()
+    {
+        return $this->hasMany(ProjectUptimeCheck::class);
+    }
+
     public function plugins()
     {
         return $this->belongsToMany(Plugin::class, 'plugin_project')

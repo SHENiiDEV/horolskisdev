@@ -67,16 +67,24 @@ class ProjectController extends Controller
         }
 
         $project->load([
-            'client',
-            'vaults',
-            'tasks' => function ($q) {
-                $q->latest();
+            'tasks' => function ($query) {
+                $query->latest();
+            },
+            'credentials',
+            'deployments' => function ($query) {
+                $query->latest();
+            },
+            'integrations',
+            'plugins',
+            'uptimeChecks' => function ($query) {
+                $query->latest()->limit(60); // Get last 60 checks (1 hour)
             }
         ]);
 
-        $activeTimer = \App\Models\TimeEntry::where('user_id', auth()->id())->whereNull('end_time')->first();
+        // Reverse checks to show oldest to newest (left to right)
+        $uptimeChecks = $project->uptimeChecks->reverse();
 
-        return view('projects.show', compact('project', 'activeTimer'));
+        return view('projects.show', compact('project', 'uptimeChecks')); // Updated compact and removed activeTimer
     }
 
     /**

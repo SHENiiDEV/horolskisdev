@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Http;
 
 class CheckProjectHealth extends Command
 {
@@ -39,17 +40,32 @@ class CheckProjectHealth extends Command
             \Illuminate\Support\Facades\Log::info("Checking project health: {$project->name} ({$url})");
 
             $isUp = false;
+            $start = microtime(true);
+            $responseTime = null;
+            $statusCode = 0;
             try {
-                $response = \Illuminate\Support\Facades\Http::withUserAgent('HorolskisBot')
+                $response = Http::withUserAgent('HorolskisBot/1.0 (+http://dev.horolska.lv/monitors)')
                     ->timeout(10)
-                    ->get($url);
-                if ($response->successful()) {
-                    $isUp = true;
-                }
+                    ->get($url); // Use $url which includes http/https prefix
+
+                $responseTime = round((microtime(true) - $start) * 1000);
+                $isUp = $response->successful();
+                $statusCode = $response->status();
             } catch (\Exception $e) {
+                $isUp = false;
+                $responseTime = null;
+                $statusCode = 0;
                 \Illuminate\Support\Facades\Log::error("Project health check failed for {$project->name}: " . $e->getMessage());
-                // $isUp remains false
             }
+
+            $status = $isUp ? 'up' : 'down';
+
+            // Log check
+            $project->uptimeChecks()->create([
+                'status' => $status,
+                'response_time_ms' => $responseTime,
+                'status_code' => $statusCode, // Added status_code to the log
+            ]);
 
             $currentStatus = $isUp ? 'up' : 'down';
             $previousStatus = $project->last_check_status;
