@@ -40,6 +40,7 @@ class ClientController extends Controller
             'country' => 'nullable|string|max:255',
             'default_hourly_rate' => 'nullable|numeric|min:0',
             'currency' => 'nullable|string|size:3',
+            'telegram_chat_id' => 'nullable|string|max:255',
         ]);
 
         \App\Models\Client::create($validated);
@@ -88,6 +89,7 @@ class ClientController extends Controller
             'notes' => 'nullable|string',
             'default_hourly_rate' => 'nullable|numeric|min:0',
             'currency' => 'nullable|string|size:3',
+            'telegram_chat_id' => 'nullable|string|max:255',
         ]);
 
         $client->update($validated);

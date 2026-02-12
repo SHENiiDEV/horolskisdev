@@ -70,6 +70,10 @@ class CheckProjectHealth extends Command
 
                     $telegram->sendMessage($msg);
 
+                    if ($project->client && $project->client->telegram_chat_id) {
+                        $telegram->sendMessage($msg, $project->client->telegram_chat_id);
+                    }
+
                 } else {
                     // Recovered UP
                     $downtime = 0;
@@ -89,6 +93,10 @@ class CheckProjectHealth extends Command
                         "Downtime: {$downtime} mins";
 
                     $telegram->sendMessage($msg);
+
+                    if ($project->client && $project->client->telegram_chat_id) {
+                        $telegram->sendMessage($msg, $project->client->telegram_chat_id);
+                    }
                 }
             } else {
                 // Status not changed, just update check time

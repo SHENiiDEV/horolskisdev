@@ -12,9 +12,17 @@ class ServerStatusController extends Controller
      */
     public function index()
     {
-        $projects = Project::where('is_monitoring_enabled', true)
-            ->whereNotNull('domain')
-            ->orderByRaw("CASE WHEN last_check_status = 'down' THEN 0 ELSE 1 END")
+        $query = Project::where('is_monitoring_enabled', true)
+            ->whereNotNull('domain');
+
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+
+        if ($user->isClient()) {
+            $query->where('client_id', $user->client_id);
+        }
+
+        $projects = $query->orderByRaw("CASE WHEN last_check_status = 'down' THEN 0 ELSE 1 END")
             ->orderBy('name')
             ->get();
 

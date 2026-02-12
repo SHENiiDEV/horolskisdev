@@ -8,6 +8,10 @@ class Client extends Model
 {
     protected $guarded = [];
 
+    protected $casts = [
+        'default_hourly_rate' => 'decimal:2',
+    ];
+
     public function projects()
     {
         return $this->hasMany(Project::class);
