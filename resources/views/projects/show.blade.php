@@ -58,15 +58,16 @@
                             <h4 class="text-sm font-medium text-gray-900">Uptime History (Last hour)</h4>
                             <span class="text-xs text-gray-400">Response Time</span>
                         </div>
-                        <div class="flex gap-1 h-12 items-end bg-gray-50 p-1 rounded-md border border-gray-100">
+                        <div class="flex gap-px h-12 bg-gray-50 p-1 rounded-md border border-gray-200 overflow-hidden">
                             @foreach($uptimeChecks as $check)
-                                <div class="flex-1 rounded-sm relative group {{ $check->status === 'up' ? 'bg-green-400 hover:bg-green-500' : 'bg-red-500 hover:bg-red-600' }}"
-                                     style="height: {{ $check->status === 'up' ? '100%' : '100%' }}; min-width: 4px;"
+                                <div class="flex-1 relative group {{ $check->status === 'up' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-rose-500 hover:bg-rose-600' }}"
                                      title="{{ $check->created_at->format('H:i') }} | Status: {{ strtoupper($check->status) }} | Response: {{ $check->response_time_ms ?? 'N/A' }}ms">
                                 </div>
                             @endforeach
                             @if($uptimeChecks->isEmpty())
-                                <div class="w-full text-center text-xs text-gray-400 py-4">No data yet</div>
+                                <div class="w-full flex items-center justify-center text-xs text-gray-400">
+                                    No uptime data recorded yet.
+                                </div>
                             @endif
                         </div>
                         <div class="mt-1 flex justify-between text-xs text-gray-400">
