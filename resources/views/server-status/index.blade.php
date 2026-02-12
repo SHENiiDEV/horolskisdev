@@ -50,11 +50,25 @@
                                 @endif
                             </div>
 
-                            {{-- Graph --}}
-                            <div class="flex gap-px h-10 bg-gray-50 p-px rounded-md border border-gray-200 overflow-hidden">
+                            <div
+                                class="flex gap-px h-10 bg-gray-50 p-px rounded-md border border-gray-200 overflow-visible">
                                 @foreach($project->uptimeChecks as $check)
-                                    <div class="flex-1 relative group {{ $check->status === 'up' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-rose-500 hover:bg-rose-600' }}"
-                                        title="{{ $check->created_at->format('H:i') }} | Status: {{ strtoupper($check->status) }} | Response: {{ $check->response_time_ms ?? 'N/A' }}ms">
+                                    <div
+                                        class="flex-1 relative group cursor-pointer {{ $check->status === 'up' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-rose-500 hover:bg-rose-600' }}">
+                                        {{-- Custom Tooltip --}}
+                                        <div
+                                            class="absolute bottom-full left-1/2 z-20 mb-2 hidden -translate-x-1/2 transform whitespace-nowrap rounded bg-white px-2 py-1 text-xs text-gray-700 shadow-lg ring-1 ring-black/5 group-hover:block">
+                                            <div
+                                                class="font-semibold {{ $check->status === 'up' ? 'text-emerald-600' : 'text-rose-600' }}">
+                                                Status: {{ strtoupper($check->status) }}
+                                            </div>
+                                            <div class="text-gray-500">{{ $check->created_at->format('H:i:s') }}</div>
+                                            <div class="text-gray-500">Response: {{ $check->response_time_ms ?? 'N/A' }}ms</div>
+                                            {{-- Arrow --}}
+                                            <div
+                                                class="absolute -bottom-1 left-1/2 -ml-1 h-2 w-2 -translate-y-1/2 rotate-45 bg-white transform ring-1 ring-black/5 border-b border-r border-gray-100/50">
+                                            </div>
+                                        </div>
                                     </div>
                                 @endforeach
                                 @if($project->uptimeChecks->isEmpty())
