@@ -76,12 +76,14 @@ class ProjectController extends Controller
             'uptimeChecks' => function ($query) {
                 $query->latest()->limit(60); // Get last 60 checks (1 hour)
             }
-        ]);
+        ])->loadAvg('uptimeChecks', 'response_time_ms')
+            ->loadMin('uptimeChecks', 'response_time_ms')
+            ->loadMax('uptimeChecks', 'response_time_ms');
 
-        // Reverse checks to show oldest to newest (left to right)
-        $uptimeChecks = $project->uptimeChecks->reverse();
+        // Reverse checks for chronological display
+        $project->setRelation('uptimeChecks', $project->uptimeChecks->reverse());
 
-        return view('projects.show', compact('project', 'uptimeChecks')); // Updated compact and removed activeTimer
+        return view('projects.show', compact('project')); // Updated compact and removed activeTimer
     }
 
     /**

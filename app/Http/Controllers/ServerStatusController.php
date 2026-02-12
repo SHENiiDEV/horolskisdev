@@ -13,7 +13,15 @@ class ServerStatusController extends Controller
     public function index()
     {
         $query = Project::where('is_monitoring_enabled', true)
-            ->whereNotNull('domain');
+            ->whereNotNull('domain')
+            ->with([
+                'uptimeChecks' => function ($q) {
+                    $q->latest()->limit(60);
+                }
+            ])
+            ->withAvg('uptimeChecks', 'response_time_ms')
+            ->withMin('uptimeChecks', 'response_time_ms')
+            ->withMax('uptimeChecks', 'response_time_ms');
 
         /** @var \App\Models\User $user */
         $user = auth()->user();
@@ -24,7 +32,12 @@ class ServerStatusController extends Controller
 
         $projects = $query->orderByRaw("CASE WHEN last_check_status = 'down' THEN 0 ELSE 1 END")
             ->orderBy('name')
-            ->get();
+            ->get()
+            ->map(function (\App\Models\Project $project) {
+                // Reverse checks for chronological display
+                $project->setRelation('uptimeChecks', $project->uptimeChecks->reverse());
+                return $project;
+            });
 
         return view('server-status.index', compact('projects'));
     }

@@ -8,60 +8,96 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 @forelse($projects as $project)
                     <div
-                        class="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
-                        <div class="flex-shrink-0">
-                            @if($project->last_check_status === 'up')
-                                <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
-                                    <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                        stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </span>
-                            @elseif($project->last_check_status === 'down')
-                                <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
-                                    <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                        stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                                    </svg>
-                                </span>
-                            @else
-                                <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
-                                    <svg class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                        stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-                                    </svg>
-                                </span>
-                            @endif
+                        class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-100 hover:shadow-md transition-shadow duration-200">
+                        <!-- Card Header -->
+                        <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                            <div class="min-w-0 flex-1">
+                                <a href="{{ route('projects.show', $project) }}" class="focus:outline-none group">
+                                    <div class="flex items-center gap-2">
+                                        <h3
+                                            class="text-base font-semibold leading-6 text-gray-900 group-hover:text-indigo-600 transition-colors">
+                                            {{ $project->name }}
+                                        </h3>
+                                    </div>
+                                    <p class="mt-1 truncate text-sm text-gray-500">{{ $project->domain }}</p>
+                                </a>
+                            </div>
+                            <div class="flex-shrink-0 ml-4">
+                                @if($project->last_check_status === 'up')
+                                    <span
+                                        class="inline-flex items-center rounded-md bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">UP</span>
+                                @elseif($project->last_check_status === 'down')
+                                    <span
+                                        class="inline-flex items-center rounded-md bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">DOWN</span>
+                                @else
+                                    <span
+                                        class="inline-flex items-center rounded-md bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">PENDING</span>
+                                @endif
+                            </div>
                         </div>
-                        <div class="min-w-0 flex-1">
-                            <a href="{{ route('projects.show', $project) }}" class="focus:outline-none">
-                                <span class="absolute inset-0" aria-hidden="true"></span>
-                                <p class="text-sm font-medium text-gray-900">{{ $project->name }}</p>
-                                <p class="truncate text-sm text-gray-500">{{ $project->domain }}</p>
-                            </a>
+
+                        <!-- Card Body: Uptime Graph -->
+                        <div class="px-6 py-5">
+                            <div class="mb-2 flex justify-between items-end">
+                                <span class="text-xs font-medium text-gray-500">Uptime (Last hour)</span>
+                                @if($project->last_check_time)
+                                    <span class="text-xs text-gray-400" title="{{ $project->last_check_time }}">
+                                        Checked {{ $project->last_check_time->diffForHumans() }}
+                                    </span>
+                                @endif
+                            </div>
+
+                            {{-- Graph --}}
+                            <div class="flex gap-px h-10 bg-gray-50 p-px rounded-md border border-gray-200 overflow-hidden">
+                                @foreach($project->uptimeChecks as $check)
+                                    <div class="flex-1 relative group {{ $check->status === 'up' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-rose-500 hover:bg-rose-600' }}"
+                                        title="{{ $check->created_at->format('H:i') }} | Status: {{ strtoupper($check->status) }} | Response: {{ $check->response_time_ms ?? 'N/A' }}ms">
+                                    </div>
+                                @endforeach
+                                @if($project->uptimeChecks->isEmpty())
+                                    <div class="w-full flex items-center justify-center text-xs text-gray-400">
+                                        No data
+                                    </div>
+                                @endif
+                            </div>
                         </div>
-                        <div>
-                            @if($project->last_check_status === 'up')
-                                <span
-                                    class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">UP</span>
-                            @elseif($project->last_check_status === 'down')
-                                <span
-                                    class="inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">DOWN</span>
-                            @else
-                                <span
-                                    class="inline-flex items-center rounded-full bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">PENDING</span>
-                            @endif
+
+                        <!-- Card Footer: Stats -->
+                        <div class="bg-gray-50 px-6 py-3 border-t border-gray-100">
+                            <dl class="grid grid-cols-3 gap-x-4 text-center">
+                                <div>
+                                    <dt class="text-[10px] font-medium text-gray-500 uppercase tracking-wider">Avg</dt>
+                                    <dd class="mt-1 text-sm font-semibold text-gray-900">
+                                        {{ $project->uptime_checks_avg_response_time_ms ? round($project->uptime_checks_avg_response_time_ms) . 'ms' : '-' }}
+                                    </dd>
+                                </div>
+                                <div class="border-l border-gray-200 pl-4 border-r pr-4">
+                                    <dt class="text-[10px] font-medium text-gray-500 uppercase tracking-wider">Min</dt>
+                                    <dd class="mt-1 text-sm font-semibold text-green-600">
+                                        {{ $project->uptime_checks_min_response_time_ms ? $project->uptime_checks_min_response_time_ms . 'ms' : '-' }}
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt class="text-[10px] font-medium text-gray-500 uppercase tracking-wider">Max</dt>
+                                    <dd class="mt-1 text-sm font-semibold text-indigo-600">
+                                        {{ $project->uptime_checks_max_response_time_ms ? $project->uptime_checks_max_response_time_ms . 'ms' : '-' }}
+                                    </dd>
+                                </div>
+                            </dl>
                         </div>
                     </div>
                 @empty
-                    <div class="col-span-full text-center text-gray-500 py-12">
-                        No monitored servers found.
+                    <div class="col-span-full flex flex-col items-center justify-center py-12 px-4 text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-semibold text-gray-900">No monitored servers</h3>
+                        <p class="mt-1 text-sm text-gray-500">Get started by enabling monitoring on your projects.</p>
                     </div>
                 @endforelse
             </div>

@@ -56,15 +56,19 @@
                     <div class="mt-6">
                         <div class="flex justify-between items-end mb-1">
                             <h4 class="text-sm font-medium text-gray-900">Uptime History (Last hour)</h4>
-                            <span class="text-xs text-gray-400">Response Time</span>
+                            <div class="flex gap-4 text-xs text-gray-500">
+                                <span>Avg: <span class="font-semibold text-gray-900">{{ $project->uptime_checks_avg_response_time_ms ? round($project->uptime_checks_avg_response_time_ms) . 'ms' : '-' }}</span></span>
+                                <span>Min: <span class="font-semibold text-green-600">{{ $project->uptime_checks_min_response_time_ms ? $project->uptime_checks_min_response_time_ms . 'ms' : '-' }}</span></span>
+                                <span>Max: <span class="font-semibold text-indigo-600">{{ $project->uptime_checks_max_response_time_ms ? $project->uptime_checks_max_response_time_ms . 'ms' : '-' }}</span></span>
+                            </div>
                         </div>
                         <div class="flex gap-px h-12 bg-gray-50 p-1 rounded-md border border-gray-200 overflow-hidden">
-                            @foreach($uptimeChecks as $check)
+                            @foreach($project->uptimeChecks as $check)
                                 <div class="flex-1 relative group {{ $check->status === 'up' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-rose-500 hover:bg-rose-600' }}"
                                      title="{{ $check->created_at->format('H:i') }} | Status: {{ strtoupper($check->status) }} | Response: {{ $check->response_time_ms ?? 'N/A' }}ms">
                                 </div>
                             @endforeach
-                            @if($uptimeChecks->isEmpty())
+                            @if($project->uptimeChecks->isEmpty())
                                 <div class="w-full flex items-center justify-center text-xs text-gray-400">
                                     No uptime data recorded yet.
                                 </div>
