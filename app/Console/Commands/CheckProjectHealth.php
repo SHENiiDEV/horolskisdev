@@ -92,9 +92,12 @@ class CheckProjectHealth extends Command
 
                 } else {
                     // Recovered UP
-                    $downtime = 0;
-                    if ($project->down_since) {
-                        $downtime = now()->diffInMinutes($project->down_since);
+                    $downtimeDuration = $project->down_since
+                        ? $project->down_since->diff(now())->format('%i minutes %s seconds')
+                        : 'unknown time';
+
+                    if ($project->down_since && $project->down_since->diff(now())->h > 0) {
+                        $downtimeDuration = $project->down_since->diff(now())->format('%h hours %i minutes');
                     }
 
                     $project->update([
@@ -106,7 +109,7 @@ class CheckProjectHealth extends Command
                     $msg = "✅ <b>Project Recovered!</b>\n" .
                         "Project: {$project->name}\n" .
                         "URL: {$project->domain}\n" .
-                        "Downtime: {$downtime} mins";
+                        "Downtime: {$downtimeDuration}";
 
                     $telegram->sendMessage($msg);
 

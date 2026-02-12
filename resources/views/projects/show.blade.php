@@ -44,7 +44,7 @@
                             @elseif($project->last_check_status === 'down')
                                 <span class="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">DOWN</span>
                                 @if($project->down_since)
-                                    <span class="text-sm text-red-600 font-bold">Down for: {{ $project->down_since->diffInMinutes() }} mins</span>
+                                    <span class="text-sm text-red-600 font-bold">Down for: {{ $project->down_since->diff(now())->format('%h h %i m %s s') }}</span>
                                 @endif
                             @else
                                 <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">PENDING</span>
