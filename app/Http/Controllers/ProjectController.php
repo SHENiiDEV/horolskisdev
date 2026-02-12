@@ -71,9 +71,6 @@ class ProjectController extends Controller
                 $query->latest();
             },
             'vaults',
-            'deployments' => function ($query) {
-                $query->latest();
-            },
             'integrations',
             'plugins',
             'uptimeChecks' => function ($query) {
