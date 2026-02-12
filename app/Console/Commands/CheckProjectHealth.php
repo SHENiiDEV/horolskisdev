@@ -44,9 +44,9 @@ class CheckProjectHealth extends Command
             $responseTime = null;
             $statusCode = 0;
             try {
-                $response = Http::withUserAgent('HorolskisBot/1.0 (+http://dev.horolska.lv/monitors)')
+                $response = Http::withUserAgent('HorolskisBot')
                     ->timeout(10)
-                    ->get($url); // Use $url which includes http/https prefix
+                    ->get($url);
 
                 $responseTime = round((microtime(true) - $start) * 1000);
                 $isUp = $response->successful();
