@@ -70,7 +70,7 @@ class ProjectController extends Controller
             'tasks' => function ($query) {
                 $query->latest();
             },
-            'credentials',
+            'vaults',
             'deployments' => function ($query) {
                 $query->latest();
             },
