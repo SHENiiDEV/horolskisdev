@@ -84,10 +84,10 @@ class CheckProjectHealth extends Command
                         "URL: {$project->domain}\n" .
                         "Time: " . now()->toDateTimeString();
 
-                    $telegram->sendMessage($msg);
-
                     if ($project->client && $project->client->telegram_chat_id) {
                         $telegram->sendMessage($msg, $project->client->telegram_chat_id);
+                    } else {
+                        $telegram->sendMessage($msg);
                     }
 
                 } else {
@@ -111,10 +111,10 @@ class CheckProjectHealth extends Command
                         "URL: {$project->domain}\n" .
                         "Downtime: {$downtimeDuration}";
 
-                    $telegram->sendMessage($msg);
-
                     if ($project->client && $project->client->telegram_chat_id) {
                         $telegram->sendMessage($msg, $project->client->telegram_chat_id);
+                    } else {
+                        $telegram->sendMessage($msg);
                     }
                 }
             } else {
