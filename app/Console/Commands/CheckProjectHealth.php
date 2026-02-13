@@ -40,22 +40,37 @@ class CheckProjectHealth extends Command
             \Illuminate\Support\Facades\Log::info("Checking project health: {$project->name} ({$url})");
 
             $isUp = false;
-            $start = microtime(true);
-            $responseTime = null;
             $statusCode = 0;
-            try {
-                $response = Http::withUserAgent('HorolskisBot')
-                    ->timeout(10)
-                    ->get($url);
+            $responseTime = null;
+            $checkAttempts = 3;
 
-                $responseTime = round((microtime(true) - $start) * 1000);
-                $isUp = $response->successful();
-                $statusCode = $response->status();
-            } catch (\Exception $e) {
-                $isUp = false;
-                $responseTime = null;
-                $statusCode = 0;
-                \Illuminate\Support\Facades\Log::error("Project health check failed for {$project->name}: " . $e->getMessage());
+            for ($i = 1; $i <= $checkAttempts; $i++) {
+                $start = microtime(true);
+                try {
+                    $response = Http::withUserAgent('HorolskisBot')
+                        ->timeout(15)
+                        ->get($url);
+
+                    if ($response->successful()) {
+                        $isUp = true;
+                        $statusCode = $response->status();
+                        $responseTime = round((microtime(true) - $start) * 1000);
+                        break; // Success, stop retrying
+                    }
+
+                    $statusCode = $response->status();
+                    \Illuminate\Support\Facades\Log::warning("Attempt {$i} failed for {$project->name}: Status {$statusCode}");
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::warning("Attempt {$i} failed for {$project->name}: " . $e->getMessage());
+                }
+
+                if ($i < $checkAttempts) {
+                    sleep(2); // Wait 2 seconds before retry
+                }
+            }
+
+            if (!$isUp) {
+                \Illuminate\Support\Facades\Log::error("Project health check failed for {$project->name} after {$checkAttempts} attempts.");
             }
 
             $status = $isUp ? 'up' : 'down';
@@ -64,7 +79,7 @@ class CheckProjectHealth extends Command
             $project->uptimeChecks()->create([
                 'status' => $status,
                 'response_time_ms' => $responseTime,
-                'status_code' => $statusCode, // Added status_code to the log
+                'status_code' => $statusCode,
             ]);
 
             $currentStatus = $isUp ? 'up' : 'down';
