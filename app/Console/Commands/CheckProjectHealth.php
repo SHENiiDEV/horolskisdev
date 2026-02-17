@@ -43,29 +43,37 @@ class CheckProjectHealth extends Command
             $statusCode = 0;
             $responseTime = null;
             $checkAttempts = 3;
+            $errorMessage = null;
 
             for ($i = 1; $i <= $checkAttempts; $i++) {
                 $start = microtime(true);
                 try {
-                    $response = Http::withUserAgent('HorolskisBot')
-                        ->timeout(15)
+                    $response = Http::withHeaders([
+                        'User-Agent' => 'HorolskisBot',
+                        'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                        'Connection' => 'close',
+                    ])
+                        ->timeout(30)
                         ->get($url);
 
                     if ($response->successful()) {
                         $isUp = true;
                         $statusCode = $response->status();
                         $responseTime = round((microtime(true) - $start) * 1000);
+                        $errorMessage = null;
                         break; // Success, stop retrying
                     }
 
                     $statusCode = $response->status();
+                    $errorMessage = "Status code: {$statusCode}";
                     \Illuminate\Support\Facades\Log::warning("Attempt {$i} failed for {$project->name}: Status {$statusCode}");
                 } catch (\Exception $e) {
+                    $errorMessage = $e->getMessage();
                     \Illuminate\Support\Facades\Log::warning("Attempt {$i} failed for {$project->name}: " . $e->getMessage());
                 }
 
                 if ($i < $checkAttempts) {
-                    sleep(2); // Wait 2 seconds before retry
+                    sleep(rand(2, 5)); // Random delay between 2 and 5 seconds
                 }
             }
 
@@ -80,6 +88,7 @@ class CheckProjectHealth extends Command
                 'status' => $status,
                 'response_time_ms' => $responseTime,
                 'status_code' => $statusCode,
+                'error_message' => $errorMessage,
             ]);
 
             $currentStatus = $isUp ? 'up' : 'down';
