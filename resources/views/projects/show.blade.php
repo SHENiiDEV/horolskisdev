@@ -156,8 +156,13 @@
                                  this.open = true;
                               },
                               openShareModal(field) {
-                                  this.shareForm.value = field.value;
-                                  this.shareForm.name = field.name;
+                                  if (field === 'vault') {
+                                      this.shareForm.value = JSON.stringify(this.vault.fields);
+                                      this.shareForm.name = this.vault.name;
+                                  } else {
+                                      this.shareForm.value = field.value;
+                                      this.shareForm.name = field.name;
+                                  }
                                   this.shareForm.expires_in = '60';
                                   this.shareForm.allowed_views = 1;
                                   this.generatedLink = null;
@@ -354,6 +359,10 @@
                                                     <h3 class="text-xl font-semibold leading-6 text-gray-900"
                                                         id="modal-title" x-text="vault.name"></h3>
                                                     <div class="flex space-x-2">
+                                                        <button type="button" @click="openShareModal('vault')"
+                                                            class="rounded bg-indigo-50 px-3 py-1.5 text-sm font-semibold text-indigo-600 shadow-sm hover:bg-indigo-100 transition-colors">
+                                                            Share
+                                                        </button>
                                                         <a :href="'/vaults/' + vault.id + '/edit'"
                                                             class="rounded bg-indigo-50 px-3 py-1.5 text-sm font-semibold text-indigo-600 shadow-sm hover:bg-indigo-100 transition-colors">
                                                             Pencil Edit
