@@ -11,12 +11,28 @@ use Tests\TestCase;
 
 class VaultShareTest extends TestCase
 {
-    // Placeholder to avoiding syntax error while I check model
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+    }
 
     public function test_user_can_create_share_link()
     {
-        $user = User::factory()->create();
-        $project = Project::factory()->create();
+        $user = User::create([
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => bcrypt('password'),
+            'role' => 'admin',
+        ]);
+
+        $client = \App\Models\Client::create(['name' => 'Test Client']);
+        $project = Project::create([
+            'name' => 'Test Project',
+            'client_id' => $client->id,
+            'status' => 'live',
+        ]);
 
         $response = $this->actingAs($user)->postJson(route('vault-shares.store'), [
             'project_id' => $project->id,
@@ -41,7 +57,13 @@ class VaultShareTest extends TestCase
 
     public function test_guest_can_view_valid_share_page()
     {
-        $project = Project::factory()->create();
+        $client = \App\Models\Client::create(['name' => 'Test Client']);
+        $project = Project::create([
+            'name' => 'Test Project',
+            'client_id' => $client->id,
+            'status' => 'live',
+        ]);
+
         $share = VaultShare::create([
             'project_id' => $project->id,
             'value' => 'secret',
@@ -57,7 +79,13 @@ class VaultShareTest extends TestCase
 
     public function test_guest_can_reveal_secret()
     {
-        $project = Project::factory()->create();
+        $client = \App\Models\Client::create(['name' => 'Test Client']);
+        $project = Project::create([
+            'name' => 'Test Project',
+            'client_id' => $client->id,
+            'status' => 'live',
+        ]);
+
         $share = VaultShare::create([
             'project_id' => $project->id,
             'value' => 'super-secret-value',
@@ -76,7 +104,13 @@ class VaultShareTest extends TestCase
 
     public function test_share_deactivates_after_max_views()
     {
-        $project = Project::factory()->create();
+        $client = \App\Models\Client::create(['name' => 'Test Client']);
+        $project = Project::create([
+            'name' => 'Test Project',
+            'client_id' => $client->id,
+            'status' => 'live',
+        ]);
+
         $share = VaultShare::create([
             'project_id' => $project->id,
             'value' => 'secret',
@@ -97,7 +131,13 @@ class VaultShareTest extends TestCase
 
     public function test_expired_share_returns_404()
     {
-        $project = Project::factory()->create();
+        $client = \App\Models\Client::create(['name' => 'Test Client']);
+        $project = Project::create([
+            'name' => 'Test Project',
+            'client_id' => $client->id,
+            'status' => 'live',
+        ]);
+
         $share = VaultShare::create([
             'project_id' => $project->id,
             'value' => 'secret',
