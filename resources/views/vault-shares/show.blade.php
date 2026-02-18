@@ -40,10 +40,14 @@
         secretType: 'text',
         secretFields: [],
         async reveal() {
+            console.log('Reveal clicked');
             this.loading = true;
             this.error = null;
             try {
-                const response = await fetch('{{ route('shares.reveal', $share->id) }}', {
+                const url = '{{ route('shares.reveal', $share->id) }}';
+                console.log('Fetching:', url);
+                
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -51,9 +55,16 @@
                     }
                 });
                 
-                if (!response.ok) throw new Error('Failed to retrieve secret. It may have expired or been viewed already.');
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    const text = await response.text();
+                    console.error('Response error:', text);
+                    throw new Error('Failed to retrieve secret. Status: ' + response.status);
+                }
                 
                 const data = await response.json();
+                console.log('Data received');
                 
                 try {
                     const parsed = JSON.parse(data.value);
@@ -65,14 +76,18 @@
                         throw new Error('Not a fields array');
                     }
                 } catch (e) {
+                    console.log('Not a JSON array or parse error:', e);
                     this.secret = data.value;
                     this.secretType = 'text';
                 }
                 
                 this.revealed = true;
             } catch (e) {
+                console.error('Reveal error:', e);
                 this.error = e.message;
+                alert('Error: ' + e.message);
             } finally {
+                console.log('Finally block');
                 this.loading = false;
             }
         }
