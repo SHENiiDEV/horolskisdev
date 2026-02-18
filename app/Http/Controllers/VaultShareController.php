@@ -40,7 +40,13 @@ class VaultShareController extends Controller
     {
         $share = \App\Models\VaultShare::active()->where('id', $id)->firstOrFail();
 
-        return view('vault-shares.show', compact('share'));
+        return view('vault-shares.show', [
+            'share' => $share,
+            'revealed' => false,
+            'secret' => null,
+            'secretFields' => [],
+            'secretType' => 'text',
+        ]);
     }
 
     public function reveal($id)
@@ -53,8 +59,26 @@ class VaultShareController extends Controller
             $share->update(['is_active' => false]);
         }
 
-        return response()->json([
-            'value' => $share->value,
+        $secret = $share->value;
+        $secretFields = [];
+        $secretType = 'text';
+
+        // Try to parse JSON
+        $decoded = json_decode($secret, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            $secretFields = $decoded;
+            $secretType = 'json';
+
+            // Create a text representation for clipboard copy if needed (fallback)
+            // But for the view we will use $secretFields
+        }
+
+        return view('vault-shares.show', [
+            'share' => $share,
+            'revealed' => true,
+            'secret' => $secret,
+            'secretFields' => $secretFields,
+            'secretType' => $secretType,
         ]);
     }
 }

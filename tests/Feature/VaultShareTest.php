@@ -93,10 +93,12 @@ class VaultShareTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->postJson(route('shares.reveal', $share->id));
+        $response = $this->post(route('shares.reveal', $share->id));
 
-        $response->assertStatus(200)
-            ->assertJson(['value' => 'super-secret-value']);
+        $response->assertStatus(200);
+        $response->assertViewIs('vault-shares.show');
+        $response->assertViewHas('secret', 'super-secret-value');
+        $response->assertViewHas('revealed', true);
 
         $this->assertEquals(1, $share->fresh()->views);
         $this->assertTrue($share->fresh()->is_active);
@@ -120,12 +122,12 @@ class VaultShareTest extends TestCase
         ]);
 
         // First view (reveal)
-        $this->postJson(route('shares.reveal', $share->id));
+        $this->post(route('shares.reveal', $share->id));
 
         $this->assertFalse($share->fresh()->is_active);
 
         // Second view - should fail
-        $response = $this->postJson(route('shares.reveal', $share->id));
+        $response = $this->post(route('shares.reveal', $share->id));
         $response->assertStatus(404);
     }
 
