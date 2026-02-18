@@ -37,6 +37,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/kanban', [\App\Http\Controllers\TaskController::class, 'kanban'])->name('tasks.kanban');
     Route::resource('tasks', \App\Http\Controllers\TaskController::class);
     Route::resource('vaults', \App\Http\Controllers\VaultController::class);
+    Route::post('/vaults/share', [\App\Http\Controllers\VaultShareController::class, 'store'])->name('vault-shares.store');
     Route::resource('time-entries', \App\Http\Controllers\TimeEntryController::class)->only(['index', 'update', 'destroy']);
 
     Route::post('/tasks/{task}/start', [\App\Http\Controllers\TimeEntryController::class, 'start'])->name('tasks.start');
@@ -63,4 +64,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/monitors', [\App\Http\Controllers\ServerStatusController::class, 'index'])->name('server-status.index');
 });
 Route::post('/telegram/webhook', [\App\Http\Controllers\TelegramController::class, 'handleWebhook'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+// Public Share Routes
+Route::get('/s/{share}', [\App\Http\Controllers\VaultShareController::class, 'show'])->name('shares.show');
+Route::post('/s/{share}/reveal', [\App\Http\Controllers\VaultShareController::class, 'reveal'])->name('shares.reveal');
+
 // require __DIR__ . '/auth.php';
