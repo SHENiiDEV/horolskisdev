@@ -19,7 +19,7 @@ class VaultShareController extends Controller
         // Use 'nullable' so we can explicitly pass null
         $expiresAt = null;
         if (!empty($validated['expires_in'])) {
-            $expiresAt = now()->addMinutes($validated['expires_in']);
+            $expiresAt = now()->addMinutes((int) $validated['expires_in']);
         }
 
         $share = \App\Models\VaultShare::create([

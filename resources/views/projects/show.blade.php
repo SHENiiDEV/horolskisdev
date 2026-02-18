@@ -516,374 +516,363 @@
 
                                     </div>
                                 </div>
-                                <!-- Share Modal -->
-                                <div x-show="shareModalOpen" class="relative z-[60]" aria-labelledby="modal-title"
-                                    role="dialog" aria-modal="true" style="display: none;">
-                                    <div x-show="shareModalOpen" x-transition:enter="ease-out duration-300"
-                                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                                        x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100"
-                                        x-transition:leave-end="opacity-0"
-                                        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-
-                                    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                                        <div
-                                            class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                                            <div x-show="shareModalOpen" @click.outside="shareModalOpen = false"
-                                                x-transition:enter="ease-out duration-300"
-                                                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                                                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                                                x-transition:leave="ease-in duration-200"
-                                                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                                                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                                                class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md sm:p-6">
-
-                                                <div x-show="!generatedLink">
-                                                    <h3 class="text-base font-semibold leading-6 text-gray-900"
-                                                        id="modal-title">Share Credential</h3>
-                                                    <div class="mt-2">
-                                                        <p class="text-sm text-gray-500">Create a secure, one-time link
-                                                            to share this credential.</p>
-
-                                                        <div class="mt-4 space-y-4">
-                                                            <div>
-                                                                <label
-                                                                    class="block text-sm font-medium leading-6 text-gray-900">Expires
-                                                                    In</label>
-                                                                <select x-model="shareForm.expires_in"
-                                                                    class="mt-1 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                                                                    <option value="60">1 Hour</option>
-                                                                    <option value="1440">1 Day</option>
-                                                                    <option value="10080">7 Days</option>
-                                                                    <option value="">Never</option>
-                                                                </select>
-                                                            </div>
-
-                                                            <div>
-                                                                <label
-                                                                    class="block text-sm font-medium leading-6 text-gray-900">Allowed
-                                                                    Views</label>
-                                                                <input type="number" x-model="shareForm.allowed_views"
-                                                                    min="1"
-                                                                    class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div
-                                                        class="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
-                                                        <button type="button" @click="generateShareLink()"
-                                                            class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:col-start-2">
-                                                            Generate Link
-                                                        </button>
-                                                        <button type="button" @click="shareModalOpen = false"
-                                                            class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0">Cancel</button>
-                                                    </div>
-                                                </div>
-
-                                                <div x-show="generatedLink" style="display: none;">
-                                                    <h3 class="text-base font-semibold leading-6 text-green-600"
-                                                        id="modal-title">Link Generated!</h3>
-                                                    <div class="mt-2">
-                                                        <p class="text-sm text-gray-500">Copy the link below. It will
-                                                            expire <span x-text="shareResult.expires_at"></span>.</p>
-
-                                                        <div
-                                                            class="mt-4 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300">
-                                                            <input type="text" x-model="generatedLink" readonly
-                                                                class="block w-full border-0 bg-transparent py-1.5 pl-2 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6">
-                                                            <button type="button"
-                                                                @click="navigator.clipboard.writeText(generatedLink); copied = true; setTimeout(() => copied = false, 2000)"
-                                                                class="relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                                                                <span x-show="!copied">Copy</span>
-                                                                <span x-show="copied"
-                                                                    class="text-green-600">Copied!</span>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                    <div class="mt-5 sm:mt-6">
-                                                        <button type="button"
-                                                            @click="shareModalOpen = false; generatedLink = null;"
-                                                            class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Done</button>
-                                                    </div>
-                                                </div>
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
                             </div>
+                        </div>
+                        <!-- Share Modal -->
+                        <div x-show="shareModalOpen" class="relative z-[60]" aria-labelledby="modal-title" role="dialog"
+                            aria-modal="true" style="display: none;">
+                            <div x-show="shareModalOpen" x-transition:enter="ease-out duration-300"
+                                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                                x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100"
+                                x-transition:leave-end="opacity-0"
+                                class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
 
-                            <!-- Tasks Tab (Kanban) -->
-                            <div x-show="tab === 'tasks'" style="display: none;" class="h-full">
-                                <div class="flex justify-between items-center mb-6">
-                                    <div>
-                                        <h3 class="text-lg font-medium text-gray-900">Project Tasks</h3>
-                                        <p class="text-sm text-gray-500">Manage workflow and track time.</p>
-                                    </div>
-                                    <div class="flex space-x-3">
-                                        @include('projects.partials.invoice-button')
-                                        <a href="{{ route('tasks.create', ['project_id' => $project->id]) }}"
-                                            class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                                            <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor"
-                                                aria-hidden="true">
-                                                <path
-                                                    d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-                                            </svg>
-                                            Add Task
-                                        </a>
-                                    </div>
-                                </div>
+                            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                                <div
+                                    class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                                    <div x-show="shareModalOpen" @click.outside="shareModalOpen = false"
+                                        x-transition:enter="ease-out duration-300"
+                                        x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                        x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                                        x-transition:leave="ease-in duration-200"
+                                        x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                                        x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                        class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md sm:p-6">
 
-                                <!-- Kanban Board -->
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 h-full items-start">
+                                        <div x-show="!generatedLink">
+                                            <h3 class="text-base font-semibold leading-6 text-gray-900"
+                                                id="modal-title">Share Credential</h3>
+                                            <div class="mt-2">
+                                                <p class="text-sm text-gray-500">Create a secure, one-time link
+                                                    to share this credential.</p>
 
-                                    <!-- Pending Column -->
-                                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                        <h4
-                                            class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3 flex items-center">
-                                            <span class="w-2 h-2 rounded-full bg-gray-400 mr-2"></span>
-                                            Pending
-                                            <span
-                                                class="ml-auto bg-gray-200 text-gray-700 py-0.5 px-2 rounded-full text-xs">
-                                                {{ $project->tasks->where('status', 'pending')->count() }}
-                                            </span>
-                                        </h4>
-                                        <div class="space-y-3 min-h-[100px]"
-                                            x-on:drop="updateTaskStatus($event, 'pending')" x-on:dragover.prevent>
-                                            @forelse($project->tasks->where('status', 'pending') as $task)
-                                                @include('projects.partials.task-card', ['task' => $task])
-                                            @empty
-                                                <div
-                                                    class="text-center py-6 text-gray-400 text-xs border-2 border-dashed border-gray-200 rounded-lg">
-                                                    No pending tasks</div>
-                                            @endforelse
-                                        </div>
-                                    </div>
-
-                                    <!-- In Progress Column -->
-                                    <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
-                                        <h4
-                                            class="text-xs font-semibold text-blue-800 uppercase tracking-wide mb-3 flex items-center">
-                                            <span class="w-2 h-2 rounded-full bg-blue-500 mr-2 animate-pulse"></span>
-                                            In Progress
-                                            <span
-                                                class="ml-auto bg-blue-200 text-blue-800 py-0.5 px-2 rounded-full text-xs">
-                                                {{ $project->tasks->where('status', 'in_progress')->count() }}
-                                            </span>
-                                        </h4>
-                                        <div class="space-y-3 min-h-[100px]"
-                                            x-on:drop="updateTaskStatus($event, 'in_progress')" x-on:dragover.prevent>
-                                            @forelse($project->tasks->where('status', 'in_progress') as $task)
-                                                @include('projects.partials.task-card', ['task' => $task])
-                                            @empty
-                                                <div
-                                                    class="text-center py-6 text-blue-300 text-xs border-2 border-dashed border-blue-200 rounded-lg">
-                                                    No active tasks</div>
-                                            @endforelse
-                                        </div>
-                                    </div>
-
-                                    <!-- Done Column -->
-                                    <div class="bg-green-50 rounded-lg p-4 border border-green-100">
-                                        <h4
-                                            class="text-xs font-semibold text-green-800 uppercase tracking-wide mb-3 flex items-center">
-                                            <span class="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-                                            Done
-                                            <span
-                                                class="ml-auto bg-green-200 text-green-800 py-0.5 px-2 rounded-full text-xs">
-                                                {{ $project->tasks->where('status', 'done')->count() }}
-                                            </span>
-                                        </h4>
-                                        <div class="space-y-3 min-h-[100px]"
-                                            x-on:drop="updateTaskStatus($event, 'done')" x-on:dragover.prevent>
-                                            @forelse($project->tasks->where('status', 'done') as $task)
-                                                @include('projects.partials.task-card', ['task' => $task])
-                                            @empty
-                                                <div
-                                                    class="text-center py-6 text-green-300 text-xs border-2 border-dashed border-green-200 rounded-lg">
-                                                    No completed tasks</div>
-                                            @endforelse
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <!-- Integrations Tab -->
-                            <div x-show="tab === 'integrations'" style="display: none;" x-data="{ openUpload: false }">
-                                <div class="flex justify-between items-center mb-6">
-                                    <h3 class="text-lg font-medium">Plugins & Integration Files</h3>
-                                    <button @click="openUpload = true"
-                                        class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">Upload
-                                        Plugin</button>
-                                </div>
-
-                                @if($project->integrations && $project->integrations->count() > 0)
-                                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                                        @foreach($project->integrations as $integration)
-                                            <div class="bg-white border rounded-lg shadow-sm p-4 hover:shadow-md transition">
-                                                <div class="flex items-start justify-between">
-                                                    <div class="flex items-center space-x-3">
-                                                        <div class="p-2 bg-indigo-50 rounded-lg text-indigo-600">
-                                                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24"
-                                                                stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                                            </svg>
-                                                        </div>
-                                                        <div>
-                                                            <h4 class="text-sm font-bold text-gray-900">{{ $integration->name }}
-                                                            </h4>
-                                                            @if($integration->documentation_url)
-                                                                <a href="{{ $integration->documentation_url }}" target="_blank"
-                                                                    class="text-xs text-indigo-600 hover:text-indigo-800 flex items-center mt-1">
-                                                                    <span>View Documentation</span>
-                                                                    <svg class="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24"
-                                                                        stroke="currentColor">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                                            stroke-width="2"
-                                                                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                                                    </svg>
-                                                                </a>
-                                                            @endif
-                                                        </div>
+                                                <div class="mt-4 space-y-4">
+                                                    <div>
+                                                        <label
+                                                            class="block text-sm font-medium leading-6 text-gray-900">Expires
+                                                            In</label>
+                                                        <select x-model="shareForm.expires_in"
+                                                            class="mt-1 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                                                            <option value="60">1 Hour</option>
+                                                            <option value="1440">1 Day</option>
+                                                            <option value="10080">7 Days</option>
+                                                            <option value="">Never</option>
+                                                        </select>
                                                     </div>
-                                                    <div class="flex space-x-2">
-                                                        <a href="{{ route('integrations.download', $integration) }}"
-                                                            class="text-gray-400 hover:text-indigo-600" title="Download">
-                                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                                                                stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                            </svg>
-                                                        </a>
-                                                        <form action="{{ route('integrations.destroy', $integration) }}"
-                                                            method="POST" onsubmit="return confirm('Delete this file?');">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="text-gray-400 hover:text-red-500"
-                                                                title="Delete">
-                                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                                                                    stroke="currentColor">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                                        stroke-width="2"
-                                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                </svg>
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                </div>
 
-                                                @if($integration->test_cards)
-                                                    <div class="mt-4 pt-4 border-t border-gray-100">
-                                                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                                                            Test Cards / Notes</p>
-                                                        <div
-                                                            class="bg-gray-50 rounded-md p-2 text-xs text-gray-700 font-mono whitespace-pre-wrap max-h-32 overflow-y-auto border border-gray-200">
-                                                            {{ $integration->test_cards }}
-                                                        </div>
+                                                    <div>
+                                                        <label
+                                                            class="block text-sm font-medium leading-6 text-gray-900">Allowed
+                                                            Views</label>
+                                                        <input type="number" x-model="shareForm.allowed_views" min="1"
+                                                            class="mt-1 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
                                                     </div>
-                                                @endif
-
-                                                <div class="mt-3 text-xs text-gray-400 text-right">
-                                                    {{ $integration->created_at->format('M d, Y') }}
                                                 </div>
                                             </div>
-                                        @endforeach
+                                            <div
+                                                class="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+                                                <button type="button" @click="generateShareLink()"
+                                                    class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:col-start-2">
+                                                    Generate Link
+                                                </button>
+                                                <button type="button" @click="shareModalOpen = false"
+                                                    class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0">Cancel</button>
+                                            </div>
+                                        </div>
+
+                                        <div x-show="generatedLink" style="display: none;">
+                                            <h3 class="text-base font-semibold leading-6 text-green-600"
+                                                id="modal-title">Link Generated!</h3>
+                                            <div class="mt-2">
+                                                <p class="text-sm text-gray-500">Copy the link below. It will
+                                                    expire <span x-text="shareResult.expires_at"></span>.</p>
+
+                                                <div
+                                                    class="mt-4 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300">
+                                                    <input type="text" x-model="generatedLink" readonly
+                                                        class="block w-full border-0 bg-transparent py-1.5 pl-2 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6">
+                                                    <button type="button"
+                                                        @click="navigator.clipboard.writeText(generatedLink); copied = true; setTimeout(() => copied = false, 2000)"
+                                                        class="relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                                                        <span x-show="!copied">Copy</span>
+                                                        <span x-show="copied" class="text-green-600">Copied!</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="mt-5 sm:mt-6">
+                                                <button type="button"
+                                                    @click="shareModalOpen = false; generatedLink = null;"
+                                                    class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Done</button>
+                                            </div>
+                                        </div>
+
                                     </div>
-                                @else
-                                    <div class="text-center rounded-lg border-2 border-dashed border-gray-300 p-12">
-                                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                        </svg>
-                                        <h3 class="mt-2 text-sm font-semibold text-gray-900">No plugins uploaded</h3>
-                                        <p class="mt-1 text-sm text-gray-500">Upload plugins and attach documentation.</p>
-                                        <div class="mt-6">
-                                            <button @click="openUpload = true"
-                                                class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                                                <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor"
-                                                    aria-hidden="true">
-                                                    <path
-                                                        d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Tasks Tab (Kanban) -->
+                <div x-show="tab === 'tasks'" style="display: none;" class="h-full">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900">Project Tasks</h3>
+                            <p class="text-sm text-gray-500">Manage workflow and track time.</p>
+                        </div>
+                        <div class="flex space-x-3">
+                            @include('projects.partials.invoice-button')
+                            <a href="{{ route('tasks.create', ['project_id' => $project->id]) }}"
+                                class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                                <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor"
+                                    aria-hidden="true">
+                                    <path
+                                        d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                                </svg>
+                                Add Task
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Kanban Board -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 h-full items-start">
+
+                        <!-- Pending Column -->
+                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                            <h4
+                                class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3 flex items-center">
+                                <span class="w-2 h-2 rounded-full bg-gray-400 mr-2"></span>
+                                Pending
+                                <span class="ml-auto bg-gray-200 text-gray-700 py-0.5 px-2 rounded-full text-xs">
+                                    {{ $project->tasks->where('status', 'pending')->count() }}
+                                </span>
+                            </h4>
+                            <div class="space-y-3 min-h-[100px]" x-on:drop="updateTaskStatus($event, 'pending')"
+                                x-on:dragover.prevent>
+                                @forelse($project->tasks->where('status', 'pending') as $task)
+                                    @include('projects.partials.task-card', ['task' => $task])
+                                @empty
+                                    <div
+                                        class="text-center py-6 text-gray-400 text-xs border-2 border-dashed border-gray-200 rounded-lg">
+                                        No pending tasks</div>
+                                @endforelse
+                            </div>
+                        </div>
+
+                        <!-- In Progress Column -->
+                        <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                            <h4
+                                class="text-xs font-semibold text-blue-800 uppercase tracking-wide mb-3 flex items-center">
+                                <span class="w-2 h-2 rounded-full bg-blue-500 mr-2 animate-pulse"></span>
+                                In Progress
+                                <span class="ml-auto bg-blue-200 text-blue-800 py-0.5 px-2 rounded-full text-xs">
+                                    {{ $project->tasks->where('status', 'in_progress')->count() }}
+                                </span>
+                            </h4>
+                            <div class="space-y-3 min-h-[100px]" x-on:drop="updateTaskStatus($event, 'in_progress')"
+                                x-on:dragover.prevent>
+                                @forelse($project->tasks->where('status', 'in_progress') as $task)
+                                    @include('projects.partials.task-card', ['task' => $task])
+                                @empty
+                                    <div
+                                        class="text-center py-6 text-blue-300 text-xs border-2 border-dashed border-blue-200 rounded-lg">
+                                        No active tasks</div>
+                                @endforelse
+                            </div>
+                        </div>
+
+                        <!-- Done Column -->
+                        <div class="bg-green-50 rounded-lg p-4 border border-green-100">
+                            <h4
+                                class="text-xs font-semibold text-green-800 uppercase tracking-wide mb-3 flex items-center">
+                                <span class="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
+                                Done
+                                <span class="ml-auto bg-green-200 text-green-800 py-0.5 px-2 rounded-full text-xs">
+                                    {{ $project->tasks->where('status', 'done')->count() }}
+                                </span>
+                            </h4>
+                            <div class="space-y-3 min-h-[100px]" x-on:drop="updateTaskStatus($event, 'done')"
+                                x-on:dragover.prevent>
+                                @forelse($project->tasks->where('status', 'done') as $task)
+                                    @include('projects.partials.task-card', ['task' => $task])
+                                @empty
+                                    <div
+                                        class="text-center py-6 text-green-300 text-xs border-2 border-dashed border-green-200 rounded-lg">
+                                        No completed tasks</div>
+                                @endforelse
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Integrations Tab -->
+                <div x-show="tab === 'integrations'" style="display: none;" x-data="{ openUpload: false }">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-medium">Plugins & Integration Files</h3>
+                        <button @click="openUpload = true"
+                            class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">Upload
+                            Plugin</button>
+                    </div>
+
+                    @if($project->integrations && $project->integrations->count() > 0)
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            @foreach($project->integrations as $integration)
+                                <div class="bg-white border rounded-lg shadow-sm p-4 hover:shadow-md transition">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+                                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                                 </svg>
-                                                Upload Plugin
-                                            </button>
-                                        </div>
-                                    </div>
-                                @endif
-
-                                <!-- Upload Modal -->
-                                <div x-show="openUpload" class="relative z-50" aria-labelledby="modal-title"
-                                    role="dialog" aria-modal="true">
-                                    <div x-show="openUpload" x-transition:enter="ease-out duration-300"
-                                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                                        x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100"
-                                        x-transition:leave-end="opacity-0"
-                                        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-                                    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                                        <div
-                                            class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                                            <div x-show="openUpload" @click.outside="openUpload = false"
-                                                class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
-                                                <form action="{{ route('integrations.store') }}" method="POST"
-                                                    enctype="multipart/form-data">
-                                                    @csrf
-                                                    <input type="hidden" name="project_id" value="{{ $project->id }}">
-                                                    <div class="space-y-4">
-                                                        <h3 class="text-lg font-semibold leading-6 text-gray-900">Upload
-                                                            Plugin / File</h3>
-                                                        <div>
-                                                            <label
-                                                                class="block text-sm font-medium leading-6 text-gray-900">Name</label>
-                                                            <div class="mt-2"><input type="text" name="name" required
-                                                                    class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                                                            </div>
-                                                        </div>
-                                                        <div>
-                                                            <label
-                                                                class="block text-sm font-medium leading-6 text-gray-900">File</label>
-                                                            <div class="mt-2"><input type="file" name="file" required
-                                                                    class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none">
-                                                            </div>
-                                                        </div>
-                                                        <div>
-                                                            <label
-                                                                class="block text-sm font-medium leading-6 text-gray-900">Documentation
-                                                                URL (Optional)</label>
-                                                            <div class="mt-2"><input type="url" name="documentation_url"
-                                                                    placeholder="https://"
-                                                                    class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                                                            </div>
-                                                        </div>
-                                                        <div>
-                                                            <label
-                                                                class="block text-sm font-medium leading-6 text-gray-900">Test
-                                                                Cards / Notes (Optional)</label>
-                                                            <div class="mt-2"><textarea name="test_cards" rows="3"
-                                                                    class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"></textarea>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div
-                                                        class="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
-                                                        <button type="submit"
-                                                            class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 sm:col-start-2">Upload</button>
-                                                        <button type="button" @click="openUpload = false"
-                                                            class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0">Cancel</button>
-                                                    </div>
-                                                </form>
+                                            </div>
+                                            <div>
+                                                <h4 class="text-sm font-bold text-gray-900">{{ $integration->name }}
+                                                </h4>
+                                                @if($integration->documentation_url)
+                                                    <a href="{{ $integration->documentation_url }}" target="_blank"
+                                                        class="text-xs text-indigo-600 hover:text-indigo-800 flex items-center mt-1">
+                                                        <span>View Documentation</span>
+                                                        <svg class="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24"
+                                                            stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                        </svg>
+                                                    </a>
+                                                @endif
                                             </div>
                                         </div>
+                                        <div class="flex space-x-2">
+                                            <a href="{{ route('integrations.download', $integration) }}"
+                                                class="text-gray-400 hover:text-indigo-600" title="Download">
+                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                </svg>
+                                            </a>
+                                            <form action="{{ route('integrations.destroy', $integration) }}" method="POST"
+                                                onsubmit="return confirm('Delete this file?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-gray-400 hover:text-red-500" title="Delete">
+                                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    @if($integration->test_cards)
+                                        <div class="mt-4 pt-4 border-t border-gray-100">
+                                            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                                                Test Cards / Notes</p>
+                                            <div
+                                                class="bg-gray-50 rounded-md p-2 text-xs text-gray-700 font-mono whitespace-pre-wrap max-h-32 overflow-y-auto border border-gray-200">
+                                                {{ $integration->test_cards }}
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    <div class="mt-3 text-xs text-gray-400 text-right">
+                                        {{ $integration->created_at->format('M d, Y') }}
                                     </div>
                                 </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center rounded-lg border-2 border-dashed border-gray-300 p-12">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                            <h3 class="mt-2 text-sm font-semibold text-gray-900">No plugins uploaded</h3>
+                            <p class="mt-1 text-sm text-gray-500">Upload plugins and attach documentation.</p>
+                            <div class="mt-6">
+                                <button @click="openUpload = true"
+                                    class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                                    <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor"
+                                        aria-hidden="true">
+                                        <path
+                                            d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                                    </svg>
+                                    Upload Plugin
+                                </button>
                             </div>
+                        </div>
+                    @endif
 
-                            <!-- Time Tab -->
-                            <div x-show="tab === 'time'" style="display: none;" x-data="{
+                    <!-- Upload Modal -->
+                    <div x-show="openUpload" class="relative z-50" aria-labelledby="modal-title" role="dialog"
+                        aria-modal="true">
+                        <div x-show="openUpload" x-transition:enter="ease-out duration-300"
+                            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                            x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100"
+                            x-transition:leave-end="opacity-0"
+                            class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+                        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                            <div
+                                class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                                <div x-show="openUpload" @click.outside="openUpload = false"
+                                    class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+                                    <form action="{{ route('integrations.store') }}" method="POST"
+                                        enctype="multipart/form-data">
+                                        @csrf
+                                        <input type="hidden" name="project_id" value="{{ $project->id }}">
+                                        <div class="space-y-4">
+                                            <h3 class="text-lg font-semibold leading-6 text-gray-900">Upload
+                                                Plugin / File</h3>
+                                            <div>
+                                                <label
+                                                    class="block text-sm font-medium leading-6 text-gray-900">Name</label>
+                                                <div class="mt-2"><input type="text" name="name" required
+                                                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label
+                                                    class="block text-sm font-medium leading-6 text-gray-900">File</label>
+                                                <div class="mt-2"><input type="file" name="file" required
+                                                        class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none">
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label
+                                                    class="block text-sm font-medium leading-6 text-gray-900">Documentation
+                                                    URL (Optional)</label>
+                                                <div class="mt-2"><input type="url" name="documentation_url"
+                                                        placeholder="https://"
+                                                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium leading-6 text-gray-900">Test
+                                                    Cards / Notes (Optional)</label>
+                                                <div class="mt-2"><textarea name="test_cards" rows="3"
+                                                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div
+                                            class="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+                                            <button type="submit"
+                                                class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 sm:col-start-2">Upload</button>
+                                            <button type="button" @click="openUpload = false"
+                                                class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Time Tab -->
+                <div x-show="tab === 'time'" style="display: none;" x-data="{
                             editingEntry: null,
                             showModal: false,
                             formAction: '',
@@ -906,200 +895,194 @@
                                 this.showModal = true;
                             }
                         }">
-                                <div class="flex justify-between items-center mb-4">
-                                    <h3 class="text-lg font-medium">Time Entries</h3>
-                                </div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-medium">Time Entries</h3>
+                    </div>
 
-                                <div class="overflow-x-auto ring-1 ring-gray-900/5 sm:rounded-lg">
-                                    <table class="min-w-full divide-y divide-gray-300">
-                                        <thead class="bg-gray-50">
-                                            <tr>
-                                                <th scope="col"
-                                                    class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                                                    User</th>
-                                                <th scope="col"
-                                                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                                    Task /
-                                                    Description</th>
-                                                <th scope="col"
-                                                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                                    Date
-                                                </th>
-                                                <th scope="col"
-                                                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                                                    Duration
-                                                </th>
-                                                <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                                                    <span class="sr-only">Edit</span>
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-gray-200 bg-white">
-                                            @forelse ($project->timeEntries()->with('user', 'task')->latest()->get() as $entry)
-                                                <tr>
-                                                    <td
-                                                        class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                                                        {{ $entry->user->name }}
-                                                    </td>
-                                                    <td class="px-3 py-4 text-sm text-gray-500">
-                                                        @if($entry->task)
-                                                            <span
-                                                                class="font-medium text-gray-900">{{ $entry->task->title }}</span><br>
-                                                        @endif
-                                                        {{ $entry->description }}
-                                                    </td>
-                                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                        {{ $entry->start_time->format('M d, H:i') }}
-                                                    </td>
-                                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                        @if($entry->duration)
-                                                            {{ gmdate('H:i:s', $entry->duration) }}
-                                                        @else
-                                                            <span
-                                                                class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">Running</span>
-                                                        @endif
-                                                    </td>
-                                                    <td
-                                                        class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                                        @if(auth()->id() === $entry->user_id || auth()->user()->isAdmin())
-                                                            <button @click="edit({{ $entry }})"
-                                                                class="text-indigo-600 hover:text-indigo-900">Edit</button>
-                                                        @endif
-                                                    </td>
-                                                </tr>
-                                            @empty
-                                                <tr>
-                                                    <td colspan="5" class="py-10 text-center text-sm text-gray-500">No time
-                                                        entries
-                                                        recorded yet.</td>
-                                                </tr>
-                                            @endforelse
-                                        </tbody>
-                                        <tfoot class="bg-gray-50">
-                                            <tr>
-                                                <td colspan="3"
-                                                    class="py-3.5 pl-4 pr-3 text-right text-sm font-semibold text-gray-900 sm:pl-6">
-                                                    Total Time:</td>
-                                                <td class="px-3 py-3.5 text-left text-sm font-bold text-gray-900">
-                                                    {{ gmdate('H:i:s', $project->timeEntries()->sum('duration')) }}
-                                                </td>
-                                                <td></td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                </div>
+                    <div class="overflow-x-auto ring-1 ring-gray-900/5 sm:rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-300">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col"
+                                        class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                                        User</th>
+                                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        Task /
+                                        Description</th>
+                                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        Date
+                                    </th>
+                                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        Duration
+                                    </th>
+                                    <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                        <span class="sr-only">Edit</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 bg-white">
+                                @forelse ($project->timeEntries()->with('user', 'task')->latest()->get() as $entry)
+                                    <tr>
+                                        <td
+                                            class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                                            {{ $entry->user->name }}
+                                        </td>
+                                        <td class="px-3 py-4 text-sm text-gray-500">
+                                            @if($entry->task)
+                                                <span class="font-medium text-gray-900">{{ $entry->task->title }}</span><br>
+                                            @endif
+                                            {{ $entry->description }}
+                                        </td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                            {{ $entry->start_time->format('M d, H:i') }}
+                                        </td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                            @if($entry->duration)
+                                                {{ gmdate('H:i:s', $entry->duration) }}
+                                            @else
+                                                <span
+                                                    class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">Running</span>
+                                            @endif
+                                        </td>
+                                        <td
+                                            class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                            @if(auth()->id() === $entry->user_id || auth()->user()->isAdmin())
+                                                <button @click="edit({{ $entry }})"
+                                                    class="text-indigo-600 hover:text-indigo-900">Edit</button>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="py-10 text-center text-sm text-gray-500">No time
+                                            entries
+                                            recorded yet.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                            <tfoot class="bg-gray-50">
+                                <tr>
+                                    <td colspan="3"
+                                        class="py-3.5 pl-4 pr-3 text-right text-sm font-semibold text-gray-900 sm:pl-6">
+                                        Total Time:</td>
+                                    <td class="px-3 py-3.5 text-left text-sm font-bold text-gray-900">
+                                        {{ gmdate('H:i:s', $project->timeEntries()->sum('duration')) }}
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
 
-                                <!-- Edit Modal -->
-                                <div x-show="showModal" class="relative z-50" aria-labelledby="modal-title"
-                                    role="dialog" aria-modal="true" style="display: none;">
-                                    <div x-show="showModal" x-transition:enter="ease-out duration-300"
-                                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                                        x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100"
-                                        x-transition:leave-end="opacity-0"
-                                        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+                    <!-- Edit Modal -->
+                    <div x-show="showModal" class="relative z-50" aria-labelledby="modal-title" role="dialog"
+                        aria-modal="true" style="display: none;">
+                        <div x-show="showModal" x-transition:enter="ease-out duration-300"
+                            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                            x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100"
+                            x-transition:leave-end="opacity-0"
+                            class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
 
-                                    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                                        <div
-                                            class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                                            <div x-show="showModal" @click.outside="showModal = false"
-                                                x-transition:enter="ease-out duration-300"
-                                                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                                                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                                                x-transition:leave="ease-in duration-200"
-                                                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                                                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                                                class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+                        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                            <div
+                                class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                                <div x-show="showModal" @click.outside="showModal = false"
+                                    x-transition:enter="ease-out duration-300"
+                                    x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                    x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                                    x-transition:leave="ease-in duration-200"
+                                    x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                                    x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                    class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
 
-                                                <div class="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
-                                                    <button type="button" @click="showModal = false"
-                                                        class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                                        <span class="sr-only">Close</span>
-                                                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                                                            stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                d="M6 18L18 6M6 6l12 12" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
+                                    <div class="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
+                                        <button type="button" @click="showModal = false"
+                                            class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                            <span class="sr-only">Close</span>
+                                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                                stroke="currentColor" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
 
-                                                <div class="sm:flex sm:items-start">
-                                                    <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
-                                                        <h3 class="text-base font-semibold leading-6 text-gray-900"
-                                                            id="modal-title">Edit Time Entry</h3>
-                                                        <div class="mt-2">
-                                                            <form :action="formAction" method="POST"
-                                                                id="editFormProject">
-                                                                @csrf
-                                                                @method('PUT')
-                                                                <div class="space-y-4">
-                                                                    <div>
-                                                                        <label
-                                                                            class="block text-sm font-medium text-gray-700">Description</label>
-                                                                        <input type="text" name="description"
-                                                                            x-model="formData.description"
-                                                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                                                    </div>
-                                                                    <div class="grid grid-cols-2 gap-4">
-                                                                        <div>
-                                                                            <label
-                                                                                class="block text-sm font-medium text-gray-700">Start
-                                                                                Time</label>
-                                                                            <input type="datetime-local"
-                                                                                name="start_time"
-                                                                                x-model="formData.start_time" required
-                                                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                                                        </div>
-                                                                        <div>
-                                                                            <label
-                                                                                class="block text-sm font-medium text-gray-700">End
-                                                                                Time</label>
-                                                                            <input type="datetime-local" name="end_time"
-                                                                                x-model="formData.end_time"
-                                                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div>
-                                                                        <label
-                                                                            class="block text-sm font-medium text-gray-700">Duration
-                                                                            Override (Minutes)</label>
-                                                                        <input type="number" name="duration_minutes"
-                                                                            x-model="formData.duration_minutes"
-                                                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                                                            placeholder="Optional - overrides calculated duration">
-                                                                        <p class="mt-1 text-xs text-gray-500">Leave
-                                                                            empty to calculate from Start/End times.</p>
-                                                                    </div>
-                                                                </div>
-                                                            </form>
+                                    <div class="sm:flex sm:items-start">
+                                        <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
+                                            <h3 class="text-base font-semibold leading-6 text-gray-900"
+                                                id="modal-title">Edit Time Entry</h3>
+                                            <div class="mt-2">
+                                                <form :action="formAction" method="POST" id="editFormProject">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <div class="space-y-4">
+                                                        <div>
+                                                            <label
+                                                                class="block text-sm font-medium text-gray-700">Description</label>
+                                                            <input type="text" name="description"
+                                                                x-model="formData.description"
+                                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                                        </div>
+                                                        <div class="grid grid-cols-2 gap-4">
+                                                            <div>
+                                                                <label
+                                                                    class="block text-sm font-medium text-gray-700">Start
+                                                                    Time</label>
+                                                                <input type="datetime-local" name="start_time"
+                                                                    x-model="formData.start_time" required
+                                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                                            </div>
+                                                            <div>
+                                                                <label
+                                                                    class="block text-sm font-medium text-gray-700">End
+                                                                    Time</label>
+                                                                <input type="datetime-local" name="end_time"
+                                                                    x-model="formData.end_time"
+                                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <label
+                                                                class="block text-sm font-medium text-gray-700">Duration
+                                                                Override (Minutes)</label>
+                                                            <input type="number" name="duration_minutes"
+                                                                x-model="formData.duration_minutes"
+                                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                                                placeholder="Optional - overrides calculated duration">
+                                                            <p class="mt-1 text-xs text-gray-500">Leave
+                                                                empty to calculate from Start/End times.</p>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse justify-between">
-                                                    <button type="submit" form="editFormProject"
-                                                        class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 sm:ml-3 sm:w-auto">Save</button>
-
-                                                    <form :action="deleteAction" method="POST"
-                                                        onsubmit="return confirm('Are you sure?');">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit"
-                                                            class="inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-red-600 shadow-sm ring-1 ring-inset ring-red-300 hover:bg-red-50 sm:mt-0 sm:w-auto">Delete</button>
-                                                    </form>
-
-                                                    <button type="button" @click="showModal = false"
-                                                        class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto sm:mr-auto">Cancel</button>
-                                                </div>
+                                                </form>
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse justify-between">
+                                        <button type="submit" form="editFormProject"
+                                            class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 sm:ml-3 sm:w-auto">Save</button>
+
+                                        <form :action="deleteAction" method="POST"
+                                            onsubmit="return confirm('Are you sure?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                class="inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-red-600 shadow-sm ring-1 ring-inset ring-red-300 hover:bg-red-50 sm:mt-0 sm:w-auto">Delete</button>
+                                        </form>
+
+                                        <button type="button" @click="showModal = false"
+                                            class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto sm:mr-auto">Cancel</button>
+                                    </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
-
                 </div>
+
             </div>
+        </div>
+
+    </div>
+    </div>
 </x-app-layout>
 
 <script>
