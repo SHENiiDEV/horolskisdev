@@ -40,58 +40,54 @@
         secretType: 'text',
         secretFields: [],
         async reveal() {
-            console.log('Reveal clicked');
             this.loading = true;
             this.error = null;
+            
+            // Timeout controller
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
             try {
-                const url = '{{ route('shares.reveal', $share->id) }}';
-                console.log('Fetching:', url);
+                // Use relative URL to avoid http/https mismatch or APP_URL issues
+                const url = '/s/{{ $share->id }}/reveal';
                 
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
-                    }
+                    },
+                    signal: controller.signal
                 });
                 
-                console.log('Response status:', response.status);
-                
+                clearTimeout(timeoutId);
+
                 if (!response.ok) {
                     const text = await response.text();
-                    console.error('Response error:', text);
-                    throw new Error('Failed to retrieve secret. Status: ' + response.status);
+                    throw new Error('Server returned ' + response.status + ': ' + text);
                 }
                 
                 const data = await response.json();
-                console.log('Data received');
                 
+                // data.value is the decrypted string.
+                // It might be a simple string (password) or a JSON string (fields array).
                 try {
+                    // Try to parse it as JSON
                     const parsed = JSON.parse(data.value);
+                    
                     if (Array.isArray(parsed)) {
+                        // Is array of fields
                         this.secretFields = parsed;
                         this.secretType = 'json';
+                        // Also populate text version for fallback
                         this.secret = parsed.map(f => `${f.name}: ${f.value}`).join('\n');
                     } else {
-                        throw new Error('Not a fields array');
-                    }
-                } catch (e) {
-                    console.log('Not a JSON array or parse error:', e);
-                    this.secret = data.value;
-                    this.secretType = 'text';
-                }
-                
-                this.revealed = true;
-            } catch (e) {
-                console.error('Reveal error:', e);
-                this.error = e.message;
-                alert('Error: ' + e.message);
-            } finally {
-                console.log('Finally block');
-                this.loading = false;
-            }
-        }
-    }">
+                        // Is JSON but not array (unlikely for " Entire Vault", but possible for single value)
+        this.secret=data.value; this.secretType='text' ; } } catch (e) { // Not valid JSON, treat as simple string
+        this.secret=data.value; this.secretType='text' ; } this.revealed=true; } catch (e) { if (e.name==='AbortError' )
+        { this.error='Request timed out. Please check your connection and try again.' ; } else { this.error=e.message
+        || 'An unknown error occurred' ; } // Show error in the secret box for visibility if needed, or just the error
+        alert } finally { this.loading=false; } } }">
         <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
 
             <!-- Initial State -->
