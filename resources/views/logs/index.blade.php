@@ -99,8 +99,8 @@
                     </div>
 
                     <div
-                        class="bg-gray-900 rounded-xl shadow-lg border border-gray-800 overflow-hidden font-mono text-xs py-4">
-                        <div id="global-terminal-content" class="h-[600px] overflow-y-auto px-4 space-y-1">
+                        class="bg-gray-900 rounded-xl shadow-lg border border-gray-800 overflow-hidden font-mono text-xs p-4">
+                        <div id="global-terminal-content" class="h-[600px] overflow-y-auto space-y-1">
                             <template x-for="(line, index) in logs" :key="index">
                                 <div
                                     class="text-gray-300 whitespace-pre-wrap break-all border-l-2 border-transparent hover:border-gray-700 hover:bg-gray-800/50 pl-2">

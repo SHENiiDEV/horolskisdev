@@ -883,110 +883,122 @@
                     </div>
                 </div>
 
-                <!-- Server Logs Tab -->
+                <!-- Terminal Tab ->
                 <div x-show="tab === 'server-logs'" style="display: none;"
                     class="animate-in fade-in slide-in-from-bottom-4 duration-500" x-data="{
-                        logs: [],
-                        connected: false,
-                        controller: null,
-                        initLogs() {
-                            if (this.connected) return;
-                            this.logs = ['Starting connection...'];
-                            this.connect();
-                        },
-                        async connect() {
+                        history: [],
+                        command: '',
+                        cwd: '~',
+                        loading: false,
+                        historyIndex: -1,
+                        commandHistory: [],
+                        
+                        async execute() {
+                            if (!this.command.trim()) return;
+                            
+                            const cmd = this.command;
+                            this.history.push({ type: 'input', content: cmd, cwd: this.cwd });
+                            this.command = '';
+                            this.loading = true;
+                            
+                            // Add to history for up/down arrows
+                            this.commandHistory.push(cmd);
+                            this.historyIndex = this.commandHistory.length;
+                            
+                            this.scrollToBottom();
+
                             try {
-                                this.controller = new AbortController();
-                                const response = await fetch('{{ route('projects.logs.stream', $project) }}', {
-                                    signal: this.controller.signal
+                                const response = await fetch('{{ route('projects.terminal.execute', $project) }}', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                    },
+                                    body: JSON.stringify({ command: cmd, cwd: this.cwd })
                                 });
 
                                 if (!response.ok) {
-                                    let errorMessage = 'Connection failed';
-                                    try {
-                                        const err = await response.json();
-                                        errorMessage = err.error || errorMessage;
-                                    } catch (e) {
-                                        errorMessage = `Server returned ${response.status} ${response.statusText}`;
-                                        console.error('Non-JSON response:', await response.text());
-                                    }
-                                    throw new Error(errorMessage);
+                                    const err = await response.json();
+                                    throw new Error(err.error || 'Execution failed');
                                 }
 
-                                this.connected = true;
-                                const reader = response.body.getReader();
-                                const decoder = new TextDecoder();
-
-                                while (true) {
-                                    const { value, done } = await reader.read();
-                                    if (done) break;
-                                    
-                                    const text = decoder.decode(value, { stream: true });
-                                    const lines = text.split('\n');
-                                    
-                                    lines.forEach(line => {
-                                        if (line.trim()) this.logs.push(line);
-                                    });
-                                    
-                                    this.$nextTick(() => {
-                                        const term = document.getElementById('terminal-content');
-                                        if (term) term.scrollTop = term.scrollHeight;
-                                    });
-                                    
-                                    if (this.logs.length > 1000) {
-                                        this.logs = this.logs.slice(-1000);
-                                    }
-                                }
-                            } catch (error) {
-                                if (error.name === 'AbortError') {
-                                    this.logs.push('Connection stopped.');
-                                } else {
-                                    this.logs.push('Error: ' + error.message);
-                                }
-                                this.connected = false;
+                                const data = await response.json();
+                                this.history.push({ type: 'output', content: data.output });
+                                this.cwd = data.cwd;
+                            } catch (e) {
+                                this.history.push({ type: 'error', content: e.message });
+                            } finally {
+                                this.loading = false;
+                                this.scrollToBottom();
+                                // Focus input
+                                $nextTick(() => { $refs.cmdInput.focus(); });
                             }
                         },
-                        disconnect() {
-                            if (this.controller) {
-                                this.controller.abort();
-                                this.controller = null;
-                                this.connected = false;
+                        
+                        scrollToBottom() {
+                            $nextTick(() => {
+                                const term = this.$refs.terminal;
+                                term.scrollTop = term.scrollHeight;
+                            });
+                        },
+                        
+                        handleKeydown(e) {
+                            if (e.key === 'ArrowUp') {
+                                e.preventDefault();
+                                if (this.historyIndex > 0) {
+                                    this.historyIndex--;
+                                    this.command = this.commandHistory[this.historyIndex];
+                                }
+                            } else if (e.key === 'ArrowDown') {
+                                e.preventDefault();
+                                if (this.historyIndex < this.commandHistory.length - 1) {
+                                    this.historyIndex++;
+                                    this.command = this.commandHistory[this.historyIndex];
+                                } else {
+                                    this.historyIndex = this.commandHistory.length;
+                                    this.command = '';
+                                }
                             }
                         }
-                    }"
-                    x-init="$watch('tab', value => { if (value === 'server-logs') initLogs(); else disconnect(); })">
-
+                    }">
+                    
                     <div class="flex justify-between items-center mb-6">
                         <div>
-                            <h3 class="text-lg font-bold text-gray-900">Live Server Logs</h3>
-                            <p class="text-sm text-gray-500">Streaming <code
-                                    class="text-xs bg-gray-100 rounded px-1">laravel.log</code> from remote server.</p>
+                            <h3 class="text-lg font-bold text-gray-900">Remote Terminal</h3>
+                            <p class="text-sm text-gray-500">Execute commands on remote server via SSH. <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">Stateless</span></p>
                         </div>
                         <div class="flex gap-2">
-                            <button @click="logs = []"
-                                class="text-xs text-gray-500 hover:text-gray-700 underline">Clear</button>
-                            <div x-show="connected"
-                                class="flex items-center gap-2 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full animate-pulse">
-                                <div class="w-1.5 h-1.5 bg-green-500 rounded-full"></div> Live
-                            </div>
-                            <div x-show="!connected"
-                                class="flex items-center gap-2 px-2 py-1 bg-gray-100 text-gray-500 text-xs rounded-full">
-                                <div class="w-1.5 h-1.5 bg-gray-400 rounded-full"></div> Disconnected
-                            </div>
+                             <button @click="history = []" class="text-xs text-gray-500 hover:text-gray-700 underline">Clear</button>
                         </div>
                     </div>
 
-                    <div
-                        class="bg-gray-900 rounded-xl shadow-lg border border-gray-800 overflow-hidden font-mono text-xs py-4">
-                        <div id="terminal-content" class="h-[500px] overflow-y-auto px-4 space-y-1">
-                            <template x-for="(line, index) in logs" :key="index">
-                                <div
-                                    class="text-gray-300 whitespace-pre-wrap break-all border-l-2 border-transparent hover:border-gray-700 hover:bg-gray-800/50 pl-2">
-                                    <span class="text-gray-500 select-none mr-2"
-                                        x-text="(new Date()).toLocaleTimeString()"></span>
-                                    <span x-text="line"></span>
+                    <div class="bg-gray-900 rounded-xl shadow-lg border border-gray-800 overflow-hidden font-mono text-xs p-4" @click="$refs.cmdInput.focus()">
+                        <div x-ref="terminal" class="h-[500px] overflow-y-auto space-y-1 mb-2">
+                            <template x-for="(entry, index) in history" :key="index">
+                                <div>
+                                    <template x-if="entry.type === 'input'">
+                                        <div class="text-green-400 font-bold mt-2">
+                                            <span class="text-blue-400" x-text="entry.cwd"></span> $ <span x-text="entry.content"></span>
+                                        </div>
+                                    </template>
+                                    <template x-if="entry.type === 'output'">
+                                        <div class="text-gray-300 whitespace-pre-wrap leading-relaxed pl-2" x-text="entry.content"></div>
+                                    </template>
+                                    <template x-if="entry.type === 'error'">
+                                        <div class="text-red-400 pl-2" x-text="entry.content"></div>
+                                    </template>
                                 </div>
                             </template>
+                            
+                            <div x-show="loading" class="text-gray-500 animate-pulse pl-2">Executing...</div>
+                            
+                            <div class="flex items-center text-green-400 font-bold mt-2">
+                                <span class="text-blue-400 mr-2" x-text="cwd"></span> $ 
+                                <input type="text" x-ref="cmdInput" x-model="command" 
+                                    @keydown="handleKeydown" @keydown.enter="execute()"
+                                    class="bg-transparent border-none outline-none text-gray-100 w-full focus:ring-0 p-0 ml-1" 
+                                    autofocus autocomplete="off" spellcheck="false">
+                            </div>
                         </div>
                     </div>
                 </div>

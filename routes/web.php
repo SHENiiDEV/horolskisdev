@@ -39,6 +39,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('vaults', \App\Http\Controllers\VaultController::class);
     Route::post('/projects/{project}/vaults/import', [\App\Http\Controllers\ProjectController::class, 'importVault'])->name('projects.vaults.import');
     Route::get('/projects/{project}/logs/stream', [\App\Http\Controllers\ProjectLogController::class, 'stream'])->name('projects.logs.stream');
+    Route::post('/projects/{project}/terminal', [\App\Http\Controllers\ProjectTerminalController::class, 'execute'])->name('projects.terminal.execute');
+
     Route::post('/vaults/share', [\App\Http\Controllers\VaultShareController::class, 'store'])->name('vault-shares.store');
     Route::resource('time-entries', \App\Http\Controllers\TimeEntryController::class)->only(['index', 'update', 'destroy']);
 
