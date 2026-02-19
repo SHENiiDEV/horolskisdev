@@ -64,6 +64,10 @@ Route::middleware('auth')->group(function () {
 
     // Server Status
     Route::get('/monitors', [\App\Http\Controllers\ServerStatusController::class, 'index'])->name('server-status.index');
+
+    // Global Logs
+    Route::get('/logs', [\App\Http\Controllers\GlobalLogController::class, 'index'])->name('logs.index');
+    Route::get('/logs/stream', [\App\Http\Controllers\GlobalLogController::class, 'stream'])->name('logs.stream');
 });
 Route::post('/telegram/webhook', [\App\Http\Controllers\TelegramController::class, 'handleWebhook'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 // Public Share Routes

@@ -94,7 +94,7 @@ class Vault extends Model
 
         $fields = collect($this->fields);
 
-        $host = $fields->firstWhere(fn($f) => in_array(strtolower($f['name']), ['host', 'hostname', 'ip', 'server']))['value'] ?? null;
+        $host = $fields->firstWhere(fn($f) => in_array(strtolower($f['name']), ['host', 'hostname', 'ip', 'server', 'host/ip']))['value'] ?? null;
         $port = $fields->firstWhere(fn($f) => strtolower($f['name']) === 'port')['value'] ?? 22;
         $username = $fields->firstWhere(fn($f) => in_array(strtolower($f['name']), ['user', 'username', 'login']))['value'] ?? 'root';
         $password = $fields->firstWhere(fn($f) => in_array(strtolower($f['name']), ['password', 'pass', 'pwd', 'secret']))['value'] ?? null;
