@@ -1422,8 +1422,8 @@
             historyIndex: -1,
             loading: false,
             cwd: '/', // Current working directory
-            init() {
-                this.output = 'Welcome to the terminal. Type `help` for a list of commands.\\n';
+            startTerminal() {
+                this.output = 'Welcome to the terminal. Type `help` for a list of commands.\n';
                 this.executeCommand('pwd'); // Get initial CWD
             },
             async executeCommand(cmd = this.command) {
@@ -1489,7 +1489,6 @@
             autocomplete() {
                 if (!this.command) return;
                 
-                // Super basic autocomplete
                 fetch('{{ route('projects.terminal.autocomplete', $project) }}', {
                     method: 'POST',
                     headers: {
@@ -1504,14 +1503,8 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data.length === 1) {
-                        // If one match, autocomplete it
-                        // We need to know what part to replace. 
-                        // Simplified: if command is just " cd Do", we replace "Do" with "Downloads/" // But input
-                usually includes the full command "cd Do" . // Logic: find the last word? // Let's assume user types
-                full path or filename. // Simple approach: if output starts with input, use output? // No, `compgen`
-                returns just the match name usually. // Current backend returns list of matches (basename usually). //
-                If I typed "nano .e" , I get ".env" . // I want "nano .env" . const match=data[0]; const
-                parts=this.command.split(' ');
+                        const match = data[0];
+                        const parts = this.command.split(' ');
                         const lastPart = parts.pop();
                         
                         // If match completes lastPart
@@ -1519,42 +1512,42 @@
                              parts.push(match);
                              this.command = parts.join(' ');
                         } else {
-                            // Maybe it was a path /var/www/htm -> html
-                            // For now, let' s just append or replace last token if it looks like a prefix
-                parts.push(match); this.command=parts.join(' ');
+                            parts.push(match);
+                            this.command = parts.join(' ');
                         }
                     } else if (data.length > 1) {
-                         // internal log to terminal
-                         this.output += `\n${data.join(' ')}\n`;
+                         this.output += `\n${data.join('  ')}\n`;
                     }
                 });
             }
-        }">
-            <!-- Terminal Display -->
-            <div class="h-96 w-full bg-black text-green-400 font-mono p-4 rounded-t-lg overflow-y-auto whitespace-pre-wrap text-sm border-b border-gray-700 shadow-inner"
-                 x-ref="terminalOutput" x-html="output"></div>
-            
-            <!-- Command Input -->
-            <div class="flex items-center bg-gray-900 rounded-b-lg p-2 border-t border-gray-700">
-                <span class="text-green-500 font-mono mr-2 ml-2">$</span>
-                <input type="text" 
-                       x-model="command" 
-                       @keydown.enter="executeCommand"
-                       @keydown.up.prevent="historyUp"
-                       @keydown.down.prevent="historyDown"
-                       @keydown.tab.prevent="autocomplete"
-                       class="flex-1 bg-transparent border-none text-gray-200 focus:ring-0 font-mono text-sm placeholder-gray-600"
-                       placeholder="Type command..."
-                       autofocus>
-                <div x-show="loading" class="animate-spin h-4 w-4 text-green-500 mr-2">
-                    <svg class="h-full w-full" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+        }" x-init="$watch('tab', value => {
+            if (value === 'terminal' && output === '') {
+                 startTerminal();
+            }
+        })">
+                <!-- Terminal Display -->
+                <div class="h-96 w-full bg-black text-green-400 font-mono p-4 rounded-t-lg overflow-y-auto whitespace-pre-wrap text-sm border-b border-gray-700 shadow-inner"
+                    x-ref="terminalOutput" x-html="output"></div>
+
+                <!-- Command Input -->
+                <div class="flex items-center bg-gray-900 rounded-b-lg p-2 border-t border-gray-700">
+                    <span class="text-green-500 font-mono mr-2 ml-2">$</span>
+                    <input type="text" x-model="command" @keydown.enter="executeCommand" @keydown.up.prevent="historyUp"
+                        @keydown.down.prevent="historyDown" @keydown.tab.prevent="autocomplete"
+                        class="flex-1 bg-transparent border-none text-gray-200 focus:ring-0 font-mono text-sm placeholder-gray-600"
+                        placeholder="Type command..." autofocus>
+                    <div x-show="loading" class="animate-spin h-4 w-4 text-green-500 mr-2">
+                        <svg class="h-full w-full" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
+                        </svg>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 </x-app-layout>
 
 <!-- Scripts for D&D -->

@@ -63,7 +63,7 @@ class ProjectFileController extends Controller
                     'name' => $filename,
                     'type' => $info['type'] == 2 ? 'directory' : 'file', // 1: file, 2: dir (phpseclib specific)
                     'size' => $info['size'],
-                    'permissions' => $info['permissions'], // string representation might be needed
+                    'permissions' => $info['permissions'] ?? '', // Fallback for permissions
                     'path' => $path === '.' ? $filename : $path . '/' . $filename
                 ];
             }
