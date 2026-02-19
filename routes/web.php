@@ -37,6 +37,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/kanban', [\App\Http\Controllers\TaskController::class, 'kanban'])->name('tasks.kanban');
     Route::resource('tasks', \App\Http\Controllers\TaskController::class);
     Route::resource('vaults', \App\Http\Controllers\VaultController::class);
+    Route::post('/projects/{project}/vaults/import', [\App\Http\Controllers\ProjectController::class, 'importVault'])->name('projects.vaults.import');
     Route::post('/vaults/share', [\App\Http\Controllers\VaultShareController::class, 'store'])->name('vault-shares.store');
     Route::resource('time-entries', \App\Http\Controllers\TimeEntryController::class)->only(['index', 'update', 'destroy']);
 

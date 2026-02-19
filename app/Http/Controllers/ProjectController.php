@@ -87,7 +87,12 @@ class ProjectController extends Controller
         // Reverse checks for chronological display
         $project->setRelation('uptimeChecks', $project->uptimeChecks->reverse());
 
-        return view('projects.show', compact('project')); // Updated compact and removed activeTimer
+        // Fetch Vault Share Access Logs
+        $accessLogs = \App\Models\VaultShareAccess::whereHas('vaultShare', function ($q) use ($project) {
+            $q->where('project_id', $project->id);
+        })->with('vaultShare')->latest()->take(50)->get();
+
+        return view('projects.show', compact('project', 'accessLogs')); // Updated compact and removed activeTimer
     }
 
     /**
@@ -132,5 +137,19 @@ class ProjectController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function importVault(Request $request, \App\Models\Project $project, \App\Services\GoogleSheetVaultImporter $importer)
+    {
+        $request->validate([
+            'sheet_url' => 'required|url|active_url',
+        ]);
+
+        try {
+            $count = $importer->import($request->sheet_url, $project);
+            return back()->with('success', "Successfully imported {$count} vault entries.");
+        } catch (\Exception $e) {
+            return back()->with('error', 'Import failed: ' . $e->getMessage());
+        }
     }
 }

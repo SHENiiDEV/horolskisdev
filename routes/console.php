@@ -10,3 +10,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('check:project-health')->everyMinute();
+Schedule::command('backup:run')->dailyAt('01:00');
+Schedule::command('backup:clean')->dailyAt('01:30');

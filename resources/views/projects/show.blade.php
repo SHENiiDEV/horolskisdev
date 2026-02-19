@@ -201,6 +201,17 @@
                         </svg>
                         Time Tracker
                     </button>
+                    <button @click="tab = 'logs'"
+                        :class="tab === 'logs' ? 'bg-white text-gray-900 shadow' : 'text-gray-500 hover:text-gray-900'"
+                        class="flex w-full items-center justify-center rounded-lg py-2.5 text-sm font-medium leading-5 ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2 select-none transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-4 h-4 mr-2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                        </svg>
+                        Logs
+                    </button>
+
                 </nav>
             </div>
 
@@ -216,6 +227,7 @@
                         generatedLink: null,
                         shareResult: {},
                         copied: false,
+                        openImportModal: false,
                         initModal(v) {
                              this.vault = v;
                              if (!this.vault.fields) this.vault.fields = [];
@@ -262,14 +274,25 @@
                             <h3 class="text-lg font-bold text-gray-900">Credentials</h3>
                             <p class="text-sm text-gray-500">Manage secure access keys and passwords.</p>
                         </div>
-                        <a href="{{ route('vaults.create', ['project_id' => $project->id]) }}"
-                            class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                            </svg>
-                            Add Credential
-                        </a>
+                        <div class="flex gap-2">
+                            <button @click="openImportModal = true"
+                                class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                                </svg>
+                                Import from Sheet
+                            </button>
+                            <a href="{{ route('vaults.create', ['project_id' => $project->id]) }}"
+                                class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                </svg>
+                                Add Credential
+                            </a>
+                        </div>
                     </div>
 
                     @if($project->vaults->count() > 0)
@@ -469,6 +492,42 @@
                                         <button @click="shareModalOpen = false; generatedLink = null"
                                             class="mt-4 w-full rounded-md bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-200">Done</button>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Import Modal -->
+                    <div x-show="openImportModal" class="relative z-[60]" style="display: none;">
+                        <div class="fixed inset-0 bg-gray-500/75 backdrop-blur-sm" @click="openImportModal = false">
+                        </div>
+                        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                            <div class="flex min-h-full items-center justify-center p-4">
+                                <div @click.stop
+                                    class="relative transform overflow-hidden rounded-lg bg-white p-6 shadow-xl transition-all sm:w-full sm:max-w-md">
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Import from Google Sheet</h3>
+                                    <form action="{{ route('projects.vaults.import', $project) }}" method="POST">
+                                        @csrf
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Google Sheet
+                                                    URL</label>
+                                                <input type="url" name="sheet_url" required
+                                                    placeholder="https://docs.google.com/spreadsheets/d/..."
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                                <p class="mt-2 text-xs text-gray-500">
+                                                    Ensure the sheet is accessible (public or shared). The system will
+                                                    export it as CSV.
+                                                </p>
+                                            </div>
+                                            <div class="flex justify-end gap-3 pt-2">
+                                                <button type="button" @click="openImportModal = false"
+                                                    class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Cancel</button>
+                                                <button type="submit"
+                                                    class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">Import</button>
+                                            </div>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -785,6 +844,69 @@
                                 class="text-indigo-600 font-bold">{{ gmdate('H:i:s', $project->timeEntries()->sum('duration')) }}</span>
                         </div>
                     </div>
+
+                <!-- Logs Tab -->
+                <div x-show="tab === 'logs'" style="display: none;"
+                    class="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900">Access Logs</h3>
+                            <p class="text-sm text-gray-500">Audit history of shared credential access.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Time</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Action</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Resource</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        IP Address</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        User Agent</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @forelse($accessLogs as $log)
+                                    <tr class="hover:bg-gray-50 transition-colors">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ $log->created_at->format('M d, Y H:i:s') }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
+                                            Accessed Secret
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {{ $log->vaultShare->name ?? 'Unknown Share' }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
+                                            {{ $log->ip_address }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-400 truncate max-w-xs"
+                                            title="{{ $log->user_agent }}">
+                                            {{ $log->user_agent }}
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-12 text-center text-sm text-gray-500">
+                                            No access logs recorded yet.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
                     <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                         <table class="min-w-full divide-y divide-gray-200">
