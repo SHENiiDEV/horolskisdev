@@ -45,10 +45,9 @@
             this.toast.type = type;
             this.toast.show = true;
             setTimeout(() => {
-                this.toast.show = false;
             }, 3000);
         }
-    }">
+    }" @notify.window="showToast($event.detail.message, $event.detail.type || 'success')">
         <!-- Toast Notification -->
         <div x-show="toast.show" x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
@@ -273,9 +272,8 @@
                                   });
                                   if (!response.ok) throw new Error('Failed to generate link');
                                   const data = await response.json();
-                                  this.generatedLink = data.link;
                                   this.shareResult = data;
-                              } catch (error) { console.error(error); alert('Error generating link.'); }
+                              } catch (error) { console.error(error); showToast('Error generating link.', 'error'); }
                         }
                     }">
 
@@ -1249,7 +1247,7 @@
                     this.path = data.path;
                     this.files = data.files;
                 } catch (e) {
-                    alert(e.message);
+                    $dispatch('notify', { message: e.message, type: 'error' });
                 } finally {
                     this.loading = false;
                 }
@@ -1279,7 +1277,7 @@
                     if (data.error) throw new Error(data.error);
                     this.fileContent = data.content;
                 } catch (e) {
-                    alert(e.message);
+                    $dispatch('notify', { message: e.message, type: 'error' });
                     this.currentFile = null;
                 } finally {
                     this.editorLoading = false;
@@ -1302,9 +1300,9 @@
                     });
                     const data = await response.json();
                     if (data.error) throw new Error(data.error);
-                    alert('File saved successfully');
+                    $dispatch('notify', { message: 'File saved successfully', type: 'success' });
                 } catch (e) {
-                    alert('Error saving file: ' + e.message);
+                    $dispatch('notify', { message: 'Error saving file: ' + e.message, type: 'error' });
                 } finally {
                     this.saving = false;
                 }
@@ -1564,7 +1562,9 @@
             if (response.ok) {
                 window.location.reload();
             } else {
-                alert('Failed to update task status');
+                // Since this is outside Alpine, we need to dispatch a global event or access the Alpine component
+                // Easiest is dispatch event on window
+                window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Failed to update task status', type: 'error' } }));
             }
         });
     }
