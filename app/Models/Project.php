@@ -51,4 +51,12 @@ class Project extends Model
             ->withPivot('plugin_version_id')
             ->withTimestamps();
     }
+
+    public function getSshVault()
+    {
+        // Prioritize a vault strictly named 'SSH' or type 'ssh'
+        return $this->vaults->first(function ($vault) {
+            return $vault->type === 'ssh' || str_contains(strtolower($vault->name), 'ssh');
+        });
+    }
 }

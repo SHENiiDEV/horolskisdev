@@ -211,6 +211,16 @@
                         </svg>
                         Logs
                     </button>
+                    <button @click="tab = 'server-logs'"
+                        :class="tab === 'server-logs' ? 'bg-white text-gray-900 shadow' : 'text-gray-500 hover:text-gray-900'"
+                        class="flex w-full items-center justify-center rounded-lg py-2.5 text-sm font-medium leading-5 ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2 select-none transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-4 h-4 mr-2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
+                        </svg>
+                        Server Logs
+                    </button>
 
                 </nav>
             </div>
@@ -863,12 +873,114 @@
                                     <tr>
                                         <td colspan="5" class="px-6 py-12 text-center text-sm text-gray-500">
                                             No access logs recorded yet. <br>
-                                            <span class="text-xs text-gray-400">Values accessed via Shared Links will appear here.</span>
+                                            <span class="text-xs text-gray-400">Values accessed via Shared Links will appear
+                                                here.</span>
                                         </td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- Server Logs Tab -->
+                <div x-show="tab === 'server-logs'" style="display: none;"
+                    class="animate-in fade-in slide-in-from-bottom-4 duration-500" x-data="{
+                        logs: [],
+                        connected: false,
+                        controller: null,
+                        initLogs() {
+                            if (this.connected) return;
+                            this.logs = ['Starting connection...'];
+                            this.connect();
+                        },
+                        async connect() {
+                            try {
+                                this.controller = new AbortController();
+                                const response = await fetch('{{ route('projects.logs.stream', $project) }}', {
+                                    signal: this.controller.signal
+                                });
+
+                                if (!response.ok) {
+                                    const err = await response.json();
+                                    throw new Error(err.error || 'Connection failed');
+                                }
+
+                                this.connected = true;
+                                const reader = response.body.getReader();
+                                const decoder = new TextDecoder();
+
+                                while (true) {
+                                    const { value, done } = await reader.read();
+                                    if (done) break;
+                                    
+                                    const text = decoder.decode(value, { stream: true });
+                                    const lines = text.split('\n');
+                                    
+                                    lines.forEach(line => {
+                                        if (line.trim()) this.logs.push(line);
+                                    });
+                                    
+                                    this.$nextTick(() => {
+                                        const term = document.getElementById('terminal-content');
+                                        if (term) term.scrollTop = term.scrollHeight;
+                                    });
+                                    
+                                    if (this.logs.length > 1000) {
+                                        this.logs = this.logs.slice(-1000);
+                                    }
+                                }
+                            } catch (error) {
+                                if (error.name === 'AbortError') {
+                                    this.logs.push('Connection stopped.');
+                                } else {
+                                    this.logs.push('Error: ' + error.message);
+                                }
+                                this.connected = false;
+                            }
+                        },
+                        disconnect() {
+                            if (this.controller) {
+                                this.controller.abort();
+                                this.controller = null;
+                                this.connected = false;
+                            }
+                        }
+                    }"
+                    x-init="$watch('tab', value => { if (value === 'server-logs') initLogs(); else disconnect(); })">
+
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900">Live Server Logs</h3>
+                            <p class="text-sm text-gray-500">Streaming <code
+                                    class="text-xs bg-gray-100 rounded px-1">laravel.log</code> from remote server.</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button @click="logs = []"
+                                class="text-xs text-gray-500 hover:text-gray-700 underline">Clear</button>
+                            <div x-show="connected"
+                                class="flex items-center gap-2 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full animate-pulse">
+                                <div class="w-1.5 h-1.5 bg-green-500 rounded-full"></div> Live
+                            </div>
+                            <div x-show="!connected"
+                                class="flex items-center gap-2 px-2 py-1 bg-gray-100 text-gray-500 text-xs rounded-full">
+                                <div class="w-1.5 h-1.5 bg-gray-400 rounded-full"></div> Disconnected
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        class="bg-gray-900 rounded-xl shadow-lg border border-gray-800 overflow-hidden font-mono text-xs py-4">
+                        <div id="terminal-content" class="h-[500px] overflow-y-auto px-4 space-y-1">
+                            <template x-for="(line, index) in logs" :key="index">
+                                <div
+                                    class="text-gray-300 whitespace-pre-wrap break-all border-l-2 border-transparent hover:border-gray-700 hover:bg-gray-800/50 pl-2">
+                                    <span class="text-gray-500 select-none mr-2"
+                                        x-text="(new Date()).toLocaleTimeString()"></span>
+                                    <span x-text="line"></span>
+                                </div>
+                            </template>
+                        </div>
                     </div>
                 </div>
 
@@ -1056,13 +1168,13 @@
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
-            </div>
 
+            </div>
         </div>
-    </div>
 </x-app-layout>
 
 <!-- Scripts for D&D -->

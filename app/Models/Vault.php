@@ -85,4 +85,27 @@ class Vault extends Model
 
         return null;
     }
+
+    public function getSshCredentials()
+    {
+        if ($this->type !== 'ssh') {
+            return null;
+        }
+
+        $fields = collect($this->fields);
+
+        $host = $fields->firstWhere(fn($f) => in_array(strtolower($f['name']), ['host', 'hostname', 'ip', 'server']))['value'] ?? null;
+        $port = $fields->firstWhere(fn($f) => strtolower($f['name']) === 'port')['value'] ?? 22;
+        $username = $fields->firstWhere(fn($f) => in_array(strtolower($f['name']), ['user', 'username', 'login']))['value'] ?? 'root';
+        $password = $fields->firstWhere(fn($f) => in_array(strtolower($f['name']), ['password', 'pass', 'pwd', 'secret']))['value'] ?? null;
+        $privateKey = $fields->firstWhere(fn($f) => in_array(strtolower($f['name']), ['key', 'private_key', 'ssh_key']))['value'] ?? null;
+
+        return [
+            'host' => $host,
+            'port' => $port,
+            'username' => $username,
+            'password' => $password,
+            'private_key' => $privateKey,
+        ];
+    }
 }
