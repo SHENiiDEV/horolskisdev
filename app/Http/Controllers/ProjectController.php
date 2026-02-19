@@ -134,9 +134,15 @@ class ProjectController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(\App\Models\Project $project)
     {
-        //
+        if (auth()->user()->isClient()) {
+            abort(403);
+        }
+
+        $project->delete();
+
+        return redirect()->route('projects.index')->with('success', 'Project deleted successfully.');
     }
 
     public function importVault(Request $request, \App\Models\Project $project, \App\Services\GoogleSheetVaultImporter $importer)

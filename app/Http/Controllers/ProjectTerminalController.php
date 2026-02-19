@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use phpseclib3\Net\SSH2;
 use phpseclib3\Crypt\PublicKeyLoader;
 
@@ -48,53 +49,39 @@ class ProjectTerminalController extends Controller
                 return response()->json(['error' => 'No authentication method found.'], 400);
             }
 
-            $ssh->setTimeout(30); // 30s timeout for commands
+            $ssh->setTimeout(30); // 30s timeout
 
             // 4. Construct Command with CWD tracking
-            // We strip any trailing semi-colons or newlines from input command slightly securely? 
-            // Actually, we just want to run it.
-            // We use a delimiter to extract the new CWD.
-            $delimiter = '---CWD-DELIMITER---';
+            $delimiter = '---CWD-DELIMITER-' . Str::random(16) . '---';
 
-            // Escape cwd slightly to prevent breaking out of cd, though user is authorized.
-            // $wrappedCommand = "cd \"$cwd\" && $command; echo \"\"; echo \"$delimiter\"; pwd";
-            // Better handling for cd failure:
-            // "if cd '$cwd'; then $command; else echo 'Failed to change directory'; fi; echo '$delimiter'; pwd"
+            // Build command prefix: only cd if we are not at ~ (initial state)
+            // And ensure we use a safe, absolute path from then on.
+            $cmdPrefix = '';
+            if ($cwd !== '~') {
+                $safeCwd = str_replace('"', '\"', $cwd);
+                $cmdPrefix = "cd \"{$safeCwd}\" && ";
+            }
 
-            // Note: complex commands with ; inside might be tricky if we don't group.
-            // ( cd "$cwd" && ( $command ) ); echo "$delimiter"; pwd
-            // We use parentheses to run in subshell? No, we want to know if 'cd' inside command changed dir?
-            // Actually, in a stateless terminal, 'cd newdir' only works if we capture the new PWD.
-            // So: cd "$cwd"; $command; echo "$delimiter"; pwd
-
-            // But if $command is "cd /var", we want the FINAL pwd.
-            // So: cd "$cwd" && { $command; }; echo "$delimiter"; pwd
-
-            $safeCwd = str_replace('"', '\"', $cwd); // Basic escaping
-
-            // We need to force a PTY or strict handling?
-            // exec() typically uses a non-interactive shell.
-            // If user runs `cd ..`, we want the next prompt to be distinct.
-
-            $fullCommand = "cd \"{$safeCwd}\" && { {$command}; }; echo \"\n{$delimiter}\"; pwd";
+            // Use braces to group the user command, enabling complex syntax like `cd foo; ls` to work
+            // within the logic flow.
+            // We append `pwd` after the delimiter to capture the new CWD.
+            $fullCommand = "{$cmdPrefix}{ {$command}; }; echo \"\n{$delimiter}\"; pwd";
 
             $output = $ssh->exec($fullCommand);
 
             // 5. Parse Output
-            $parts = explode("\n{$delimiter}\n", $output);
-
-            if (count($parts) < 2) {
-                // Fallback if delimiter not found (maybe command messed with output stream or killed shell)
-                // Try simpler split or just return output and keep old cwd
-                $parts = explode($delimiter, $output);
-            }
+            // Split by the delimiter. We expect: [Command Output] [Delimiter] [New CWD]
+            $parts = explode($delimiter, $output);
 
             if (count($parts) >= 2) {
                 $cmdOutput = trim($parts[0]);
+                // The CWD might have a newline at the end or garbage if something weird happened
                 $newCwd = trim($parts[1]);
             } else {
+                // Fallback: something went wrong with the container/echo
+                // Return raw output and keep old CWD (safest)
                 $cmdOutput = $output;
-                $newCwd = $cwd; // Failed to get new CWD
+                $newCwd = $cwd;
             }
 
             return response()->json([

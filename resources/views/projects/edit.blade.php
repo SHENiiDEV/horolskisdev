@@ -95,7 +95,27 @@
                         </div>
                     </form>
                 </div>
+                <div class="mt-10 pt-10 border-t border-gray-100">
+                    <div class="rounded-lg bg-red-50 p-6 border border-red-100">
+                        <h3 class="text-sm font-semibold text-red-800">Danger Zone</h3>
+                        <div class="mt-2 text-sm text-red-700">
+                            <p>Once you delete a project, there is no going back. Please be certain.</p>
+                        </div>
+                        <div class="mt-4">
+                            <form action="{{ route('projects.destroy', $project) }}" method="POST"
+                                onsubmit="return confirm('Are you sure you want to delete this project? This action cannot be undone.');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                    class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-red-600 shadow-sm ring-1 ring-inset ring-red-300 hover:bg-red-50 transition-colors">
+                                    Delete Project
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
     </div>
 </x-app-layout>
