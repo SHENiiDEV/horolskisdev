@@ -34,7 +34,13 @@ class ServerStatusController extends Controller
             ->orderBy('name')
             ->get()
             ->map(function (\App\Models\Project $project) {
-                // Reverse checks for chronological display
+                // Calculate stats in memory from the last 60 checks
+                $checks = $project->uptimeChecks;
+                $project->uptime_checks_avg_response_time_ms = $checks->avg('response_time_ms');
+                $project->uptime_checks_min_response_time_ms = $checks->min('response_time_ms');
+                $project->uptime_checks_max_response_time_ms = $checks->max('response_time_ms');
+
+                // Reverse checks for chronological display (oldest -> newest)
                 $project->setRelation('uptimeChecks', $project->uptimeChecks->reverse());
                 return $project;
             });

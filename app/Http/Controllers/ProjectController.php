@@ -76,9 +76,13 @@ class ProjectController extends Controller
             'uptimeChecks' => function ($query) {
                 $query->latest()->limit(60); // Get last 60 checks (1 hour)
             }
-        ])->loadAvg('uptimeChecks', 'response_time_ms')
-            ->loadMin('uptimeChecks', 'response_time_ms')
-            ->loadMax('uptimeChecks', 'response_time_ms');
+        ]);
+
+        // Calculate stats in memory from the last 60 checks to avoid full-table scans
+        $checks = $project->uptimeChecks;
+        $project->uptime_checks_avg_response_time_ms = $checks->avg('response_time_ms');
+        $project->uptime_checks_min_response_time_ms = $checks->min('response_time_ms');
+        $project->uptime_checks_max_response_time_ms = $checks->max('response_time_ms');
 
         // Reverse checks for chronological display
         $project->setRelation('uptimeChecks', $project->uptimeChecks->reverse());

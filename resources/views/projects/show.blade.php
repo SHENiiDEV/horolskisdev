@@ -96,14 +96,23 @@
                             <div class="text-xs text-gray-400">Last 60 Minutes</div>
                         </div>
                         <!-- ... (Uptime Bars - simpler version for brevity) ... -->
-                        <div class="flex gap-0.5 h-8 bg-gray-50/50 rounded overflow-hidden">
+                        <div class="flex gap-px h-10 bg-gray-50 rounded-md border border-gray-200 overflow-visible relative">
                             @foreach($project->uptimeChecks as $check)
-                                <div class="flex-1 relative group {{ $check->status === 'up' ? 'bg-emerald-400' : 'bg-rose-500' }}"
-                                    title="{{ strtoupper($check->status) }} - {{ $check->created_at->format('H:i') }} - {{ $check->response_time_ms }}ms">
+                                <div class="flex-1 relative group cursor-pointer {{ $check->status === 'up' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-rose-500 hover:bg-rose-600' }} h-full first:rounded-l-sm last:rounded-r-sm transition-colors">
+                                    {{-- Custom Tooltip --}}
+                                    <div class="absolute bottom-full left-1/2 z-50 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white shadow-lg group-hover:block transition-all">
+                                        <div class="font-bold flex items-center gap-2">
+                                            <span class="w-1.5 h-1.5 rounded-full {{ $check->status === 'up' ? 'bg-emerald-400' : 'bg-rose-400' }}"></span>
+                                            {{ strtoupper($check->status) }}
+                                        </div>
+                                        <div class="text-gray-300 text-[10px] mt-0.5">{{ $check->created_at->format('H:i:s') }} &bull; {{ $check->response_time_ms }}ms</div>
+                                        {{-- Arrow --}}
+                                        <div class="absolute -bottom-1 left-1/2 -ml-1 h-2 w-2 -translate-y-1/2 rotate-45 bg-gray-900"></div>
+                                    </div>
                                 </div>
                             @endforeach
                             @if($project->uptimeChecks->isEmpty())
-                                <div class="w-full flex items-center justify-center text-xs text-gray-400">No data</div>
+                                <div class="w-full flex items-center justify-center text-xs text-gray-400 h-full">No monitoring data available</div>
                             @endif
                         </div>
                     </div>

@@ -51,7 +51,9 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $user = \App\Models\User::findOrFail($id);
+        $clients = \App\Models\Client::all();
+        return view('users.edit', compact('user', 'clients'));
     }
 
     /**
@@ -59,7 +61,25 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $user = \App\Models\User::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:8',
+            'role' => 'required|in:admin,client',
+            'client_id' => 'nullable|exists:clients,id',
+        ]);
+
+        if (!empty($validated['password'])) {
+            $validated['password'] = \Illuminate\Support\Facades\Hash::make($validated['password']);
+        } else {
+            unset($validated['password']);
+        }
+
+        $user->update($validated);
+
+        return redirect()->route('users.index')->with('success', 'User updated successfully.');
     }
 
     /**
@@ -67,6 +87,14 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $user = \App\Models\User::findOrFail($id);
+
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'You cannot delete your own account.');
+        }
+
+        $user->delete();
+
+        return redirect()->route('users.index')->with('success', 'User deleted successfully.');
     }
 }
