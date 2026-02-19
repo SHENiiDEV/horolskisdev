@@ -16,12 +16,26 @@ class GoogleSheetVaultImporter
 
         // 2. Fetch CSV
         $response = Http::get($csvUrl);
+
         if ($response->failed()) {
-            throw new \Exception('Failed to fetch Google Sheet. Please ensure the link is publicly accessible or shared with the server.');
+            \Log::error('Google Sheet Import HTTP Error', ['status' => $response->status(), 'url' => $csvUrl]);
+            throw new \Exception('Failed to fetch Google Sheet. Status: ' . $response->status());
         }
 
-        $csvData = $response->body();
+        $contentType = $response->header('Content-Type');
+        $body = $response->body();
+
+        // Check if response is HTML (login page likely)
+        if (str_contains(strtolower($contentType), 'html') || str_contains($body, '<!doctype html') || str_contains($body, '<html')) {
+            \Log::error('Google Sheet Import: Received HTML instead of CSV', ['preview' => substr($body, 0, 500)]);
+            throw new \Exception("The Google Sheet URL returned HTML instead of CSV. Please ensure 'Anyone with the link' can view.");
+        }
+
+        $csvData = $body;
         $rows = array_map('str_getcsv', explode("\n", $csvData));
+
+        \Log::info('Google Sheet Import Rows', ['count' => count($rows), 'header_row' => $rows[0] ?? null]);
+
 
         // Remove header if it exists (heuristic: check for common header keywords)
         if (isset($rows[0])) {

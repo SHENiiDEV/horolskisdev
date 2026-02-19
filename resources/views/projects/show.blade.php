@@ -808,43 +808,6 @@
                     </div>
                 </div>
 
-                <!-- Time Tab -->
-                <div x-show="tab === 'time'" style="display: none;"
-                    class="animate-in fade-in slide-in-from-bottom-4 duration-500" x-data="{
-                            editingEntry: null,
-                            showModal: false,
-                            formAction: '',
-                            deleteAction: '',
-                            formData: {
-                                start_time: '',
-                                end_time: '',
-                                description: '',
-                                duration_minutes: ''
-                            },
-                            edit(entry) {
-                                this.editingEntry = entry;
-                                this.formData.start_time = entry.start_time.slice(0, 16);
-                                this.formData.end_time = entry.end_time ? entry.end_time.slice(0, 16) : '';
-                                this.formData.description = entry.description;
-                                this.formData.duration_minutes = entry.duration ? Math.round(entry.duration / 60) : '';
-                                
-                                this.formAction = '/time-entries/' + entry.id;
-                                this.deleteAction = '/time-entries/' + entry.id;
-                                this.showModal = true;
-                            }
-                        }">
-
-                    <div class="flex justify-between items-center mb-6">
-                        <div>
-                            <h3 class="text-lg font-bold text-gray-900">Time Tracking</h3>
-                            <p class="text-sm text-gray-500">Monitor time spent on tasks and general activities.</p>
-                        </div>
-                        <div class="text-sm text-gray-500 font-medium">
-                            Total: <span
-                                class="text-indigo-600 font-bold">{{ gmdate('H:i:s', $project->timeEntries()->sum('duration')) }}</span>
-                        </div>
-                    </div>
-
                 <!-- Logs Tab -->
                 <div x-show="tab === 'logs'" style="display: none;"
                     class="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -899,7 +862,8 @@
                                 @empty
                                     <tr>
                                         <td colspan="5" class="px-6 py-12 text-center text-sm text-gray-500">
-                                            No access logs recorded yet.
+                                            No access logs recorded yet. <br>
+                                            <span class="text-xs text-gray-400">Values accessed via Shared Links will appear here.</span>
                                         </td>
                                     </tr>
                                 @endforelse
@@ -907,6 +871,45 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- Time Tab -->
+                <div x-show="tab === 'time'" style="display: none;"
+                    class="animate-in fade-in slide-in-from-bottom-4 duration-500" x-data="{
+                            editingEntry: null,
+                            showModal: false,
+                            formAction: '',
+                            deleteAction: '',
+                            formData: {
+                                start_time: '',
+                                end_time: '',
+                                description: '',
+                                duration_minutes: ''
+                            },
+                            edit(entry) {
+                                this.editingEntry = entry;
+                                this.formData.start_time = entry.start_time.slice(0, 16);
+                                this.formData.end_time = entry.end_time ? entry.end_time.slice(0, 16) : '';
+                                this.formData.description = entry.description;
+                                this.formData.duration_minutes = entry.duration ? Math.round(entry.duration / 60) : '';
+                                
+                                this.formAction = '/time-entries/' + entry.id;
+                                this.deleteAction = '/time-entries/' + entry.id;
+                                this.showModal = true;
+                            }
+                        }">
+
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900">Time Tracking</h3>
+                            <p class="text-sm text-gray-500">Monitor time spent on tasks and general activities.</p>
+                        </div>
+                        <div class="text-sm text-gray-500 font-medium">
+                            Total: <span
+                                class="text-indigo-600 font-bold">{{ gmdate('H:i:s', $project->timeEntries()->sum('duration')) }}</span>
+                        </div>
+                    </div>
+
+
 
                     <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                         <table class="min-w-full divide-y divide-gray-200">
