@@ -76,7 +76,7 @@ class ProjectLogController extends Controller
                 'X-Accel-Buffering' => 'no', // Nginx
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return response()->json(['error' => 'SSH Connection Failed: ' . $e->getMessage()], 500);
         }
     }

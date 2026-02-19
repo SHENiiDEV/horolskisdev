@@ -21,26 +21,26 @@ class GlobalLogController extends Controller
         }
 
         return new StreamedResponse(function () use ($logPath) {
-            if (ob_get_level())
-                ob_end_clean();
+            try {
+                if (ob_get_level())
+                    ob_end_clean();
 
-            echo "Tailing local {$logPath}...\n";
-            flush();
+                echo "Tailing local {$logPath}...\n";
+                flush();
 
-            // Simple tail implementation using shell_exec or similar
-            // Since we are on local/server, we can use `tail` command if available
-            // Or use PHP to read file. `tail -f` is most robust for following.
+                $handle = popen("tail -n 50 -f " . escapeshellarg($logPath), 'r');
 
-            $handle = popen("tail -n 50 -f " . escapeshellarg($logPath), 'r');
+                while (!feof($handle)) {
+                    $line = fgets($handle);
+                    echo $line;
+                    flush();
+                }
 
-            while (!feof($handle)) {
-                $line = fgets($handle);
-                echo $line;
+                pclose($handle);
+            } catch (\Throwable $e) {
+                echo "Error: " . $e->getMessage() . "\n";
                 flush();
             }
-
-            pclose($handle);
-
         }, 200, [
             'Content-Type' => 'text/event-stream',
             'Cache-Control' => 'no-cache',

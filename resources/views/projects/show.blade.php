@@ -902,8 +902,15 @@
                                 });
 
                                 if (!response.ok) {
-                                    const err = await response.json();
-                                    throw new Error(err.error || 'Connection failed');
+                                    let errorMessage = 'Connection failed';
+                                    try {
+                                        const err = await response.json();
+                                        errorMessage = err.error || errorMessage;
+                                    } catch (e) {
+                                        errorMessage = `Server returned ${response.status} ${response.statusText}`;
+                                        console.error('Non-JSON response:', await response.text());
+                                    }
+                                    throw new Error(errorMessage);
                                 }
 
                                 this.connected = true;
