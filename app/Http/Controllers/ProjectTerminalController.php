@@ -63,9 +63,9 @@ class ProjectTerminalController extends Controller
             }
 
             // Use braces to group the user command, enabling complex syntax like `cd foo; ls` to work
-            // within the logic flow.
+            // within the logic flow. We redirect stderr to stdout (2>&1) to capture errors like 'cd: no such file'.
             // We append `pwd` after the delimiter to capture the new CWD.
-            $fullCommand = "{$cmdPrefix}{ {$command}; }; echo \"\n{$delimiter}\"; pwd";
+            $fullCommand = "{$cmdPrefix}{ {$command}; } 2>&1; echo \"\n{$delimiter}\"; pwd";
 
             $output = $ssh->exec($fullCommand);
 

@@ -14,8 +14,8 @@ window.startXterm = function (containerId, executeRoute, autocompleteRoute, csrf
         fontFamily: 'Menlo, Monaco, "Courier New", monospace',
         fontSize: 14,
         theme: {
-            background: '#000000',
-            foreground: '#00ff00',
+            background: '#101828',
+            foreground: '#05df72',
         }
     });
 
