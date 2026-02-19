@@ -1413,136 +1413,24 @@
         </div>
         <!-- Terminal Tab -->
         <div x-show="tab === 'terminal'" class="mt-6">
-            <div class="bg-white shadow sm:rounded-lg" x-data="{
-            command: '',
-            output: '',
-            history: [],
-            historyIndex: -1,
-            loading: false,
-            cwd: '/', // Current working directory
-            startTerminal() {
-                this.output = 'Welcome to the terminal. Type `help` for a list of commands.\n';
-                this.executeCommand('pwd'); // Get initial CWD
-            },
-            async executeCommand(cmd = this.command) {
-                if (!cmd.trim()) return;
-
-                this.output += `\\n$ ${cmd}\\n`;
-                this.loading = true;
-
-                if (this.history[this.history.length - 1] !== cmd) {
-                    this.history.push(cmd);
-                }
-                this.historyIndex = this.history.length; // Reset history index
-
-                try {
-                    const response = await fetch(`{{ route('projects.terminal.execute', $project) }}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({
-                            command: cmd,
-                            cwd: this.cwd
-                        })
-                    });
-                    const data = await response.json();
-
-                    if (data.error) {
-                        this.output += `Error: ${data.error}\\n`;
-                    } else {
-                        this.output += data.output;
-                        if (data.newCwd) {
-                            this.cwd = data.newCwd;
-                        }
+            @vite('resources/js/terminal.js')
+            <div class="bg-white shadow sm:rounded-lg" x-init="$watch('tab', value => {
+                    if (value === 'terminal') {
+                        // wait for vite to load module? or just delay slightly
+                        setTimeout(() => {
+                            if (window.startXterm) {
+                                window.startXterm(
+                                    'terminal-container',
+                                    '{{ route('projects.terminal.execute', $project) }}',
+                                    '{{ route('projects.terminal.autocomplete', $project) }}',
+                                    '{{ csrf_token() }}'
+                                );
+                            }
+                        }, 100);
                     }
-                } catch (e) {
-                    this.output += `Client-side error: ${e.message}\\n`;
-                } finally {
-                    this.command = '';
-                    this.loading = false;
-                    this.$nextTick(() => {
-                        this.$refs.terminalOutput.scrollTop = this.$refs.terminalOutput.scrollHeight;
-                    });
-                }
-            },
-            historyUp() {
-                if (this.history.length === 0) return;
-                if (this.historyIndex > 0) {
-                    this.historyIndex--;
-                    this.command = this.history[this.historyIndex];
-                }
-            },
-            historyDown() {
-                if (this.history.length === 0) return;
-                if (this.historyIndex < this.history.length - 1) {
-                    this.historyIndex++;
-                    this.command = this.history[this.historyIndex];
-                } else if (this.historyIndex === this.history.length - 1) {
-                    this.historyIndex++;
-                    this.command = '';
-                }
-            },
-            autocomplete() {
-                if (!this.command) return;
-                
-                fetch('{{ route('projects.terminal.autocomplete', $project) }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        input: this.command,
-                        cwd: this.cwd
-                    })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.length === 1) {
-                        const match = data[0];
-                        const parts = this.command.split(' ');
-                        const lastPart = parts.pop();
-                        
-                        // If match completes lastPart
-                        if (match.startsWith(lastPart)) {
-                             parts.push(match);
-                             this.command = parts.join(' ');
-                        } else {
-                            parts.push(match);
-                            this.command = parts.join(' ');
-                        }
-                    } else if (data.length > 1) {
-                         this.output += `\n${data.join('  ')}\n`;
-                    }
-                });
-            }
-        }" x-init="$watch('tab', value => {
-            if (value === 'terminal' && output === '') {
-                 startTerminal();
-            }
-        })">
-                <!-- Terminal Display -->
-                <div class="h-96 w-full bg-black text-green-400 font-mono p-4 rounded-t-lg overflow-y-auto whitespace-pre-wrap text-sm border-b border-gray-700 shadow-inner"
-                    x-ref="terminalOutput" x-html="output"></div>
-
-                <!-- Command Input -->
-                <div class="flex items-center bg-gray-900 rounded-b-lg p-2 border-t border-gray-700">
-                    <span class="text-green-500 font-mono mr-2 ml-2">$</span>
-                    <input type="text" x-model="command" @keydown.enter="executeCommand" @keydown.up.prevent="historyUp"
-                        @keydown.down.prevent="historyDown" @keydown.tab.prevent="autocomplete"
-                        class="flex-1 bg-transparent border-none text-gray-200 focus:ring-0 font-mono text-sm placeholder-gray-600"
-                        placeholder="Type command..." autofocus>
-                    <div x-show="loading" class="animate-spin h-4 w-4 text-green-500 mr-2">
-                        <svg class="h-full w-full" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
-                            </circle>
-                            <path class="opacity-75" fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                            </path>
-                        </svg>
-                    </div>
+                })">
+                <div id="terminal-container"
+                    class="h-[500px] w-full bg-black rounded-lg overflow-hidden border border-gray-700 shadow-inner">
                 </div>
             </div>
         </div>

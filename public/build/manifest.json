@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-I0J3mzVJ.css",
+    "file": "assets/app-BLf9DJ3A.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -13,5 +13,14 @@
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true
+  },
+  "resources/js/terminal.js": {
+    "file": "assets/terminal-mbCt6XUo.js",
+    "name": "terminal",
+    "src": "resources/js/terminal.js",
+    "isEntry": true,
+    "css": [
+      "assets/terminal-G5OQeJvU.css"
+    ]
   }
 }
