@@ -48,6 +48,9 @@
     class="font-sans text-gray-900 antialiased bg-gray-100 min-h-screen flex flex-col justify-center items-center py-12 sm:px-6 lg:px-8">
 
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="text-center mb-6">
+            <h1 class="text-xs font-bold tracking-widest text-gray-400 uppercase">HOROLSKIS DEV</h1>
+        </div>
         <div class="mx-auto h-12 w-12 text-indigo-600">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="w-12 h-12">
@@ -57,7 +60,8 @@
         </div>
         <h2 class="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">Secure Credential</h2>
         <p class="mt-2 text-center text-sm text-gray-600">
-            You have received a secure shared secret.
+            You have received a secure shared secret from <span
+                class="font-semibold text-gray-900">{{ $share->project->name ?? 'a secure source' }}</span>.
         </p>
     </div>
 

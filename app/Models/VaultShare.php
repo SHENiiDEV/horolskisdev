@@ -39,4 +39,8 @@ class VaultShare extends Model
             })
             ->whereRaw('views < allowed_views');
     }
+    public function accesses()
+    {
+        return $this->hasMany(VaultShareAccess::class);
+    }
 }

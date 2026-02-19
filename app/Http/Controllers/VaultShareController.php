@@ -49,9 +49,15 @@ class VaultShareController extends Controller
         ]);
     }
 
-    public function reveal($id)
+    public function reveal(Request $request, $id)
     {
         $share = \App\Models\VaultShare::active()->where('id', $id)->firstOrFail();
+
+        // Log access
+        $share->accesses()->create([
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
         $share->increment('views');
 
