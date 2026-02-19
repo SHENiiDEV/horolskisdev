@@ -93,4 +93,69 @@ class ProjectTerminalController extends Controller
             return response()->json(['error' => 'SSH Error: ' . $e->getMessage()], 500);
         }
     }
+
+    public function autocomplete(Request $request, Project $project)
+    {
+        $request->validate([
+            'input' => 'nullable|string',
+            'cwd' => 'required|string',
+        ]);
+
+        $input = $request->input('input', '');
+        $cwd = $request->input('cwd');
+
+        // 1. Get SSH
+        $vault = $project->getSshVault();
+        if (!$vault)
+            return response()->json([]);
+        $creds = $vault->getSshCredentials();
+        if (!$creds['host'])
+            return response()->json([]);
+
+        try {
+            $ssh = new SSH2($creds['host'], $creds['port']);
+            if ($creds['private_key']) {
+                $key = PublicKeyLoader::load($creds['private_key'], $creds['password']);
+                $ssh->login($creds['username'], $key);
+            } elseif ($creds['password']) {
+                $ssh->login($creds['username'], $creds['password']);
+            } else {
+                return response()->json([]);
+            }
+
+            $ssh->setTimeout(5);
+
+            // Handle CWD same as execute
+            $cmdPrefix = '';
+            if ($cwd !== '~') {
+                $safeCwd = str_replace('"', '\"', $cwd);
+                $cmdPrefix = "cd \"{$safeCwd}\" && ";
+            }
+
+            // Simple logic: use 'ls -d $input*' to find matches? 
+            // Or better: compgen if bash is available. `bash -c "compgen -f $input"`
+            // But strict 'ls -1d' is often safer for minimal environments.
+            // We want to complete files and folders.
+
+            // If input has spaces, it might break. Basic handling:
+            $safeInput = escapeshellarg($input . '*');
+
+            // "ls -1dF" gives us slash at end of dirs
+            $cmd = "{$cmdPrefix}ls -1dF {$input}* 2>/dev/null";
+
+            $output = $ssh->exec($cmd);
+
+            // Limit results
+            $suggestions = collect(explode("\n", $output))
+                ->map(fn($line) => trim($line))
+                ->filter()
+                ->take(10)
+                ->values();
+
+            return response()->json($suggestions);
+
+        } catch (\Throwable $e) {
+            return response()->json([]);
+        }
+    }
 }

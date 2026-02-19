@@ -711,6 +711,32 @@
                                                         d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                                 </svg>
                                             </a>
+                                            <a href="#"
+                                                class="group inline-flex items-center border-b-2 py-4 px-1 text-sm font-medium"
+                                                :class="tab === 'terminal' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'"
+                                                @click.prevent="tab = 'terminal'">
+                                                <svg class="-ml-0.5 mr-2 h-5 w-5"
+                                                    :class="tab === 'terminal' ? 'text-indigo-500' : 'text-gray-400 group-hover:text-gray-500'"
+                                                    viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd"
+                                                        d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L7.586 10 5.293 7.707a1 1 0 010-1.414zM11 12a1 1 0 100 2h3a1 1 0 100-2h-3z"
+                                                        clip-rule="evenodd" />
+                                                </svg>
+                                                Terminal
+                                            </a>
+                                            <a href="#"
+                                                class="group inline-flex items-center border-b-2 py-4 px-1 text-sm font-medium"
+                                                :class="tab === 'files' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'"
+                                                @click.prevent="tab = 'files'">
+                                                <svg class="-ml-0.5 mr-2 h-5 w-5"
+                                                    :class="tab === 'files' ? 'text-indigo-500' : 'text-gray-400 group-hover:text-gray-500'"
+                                                    viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd"
+                                                        d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
+                                                        clip-rule="evenodd" />
+                                                </svg>
+                                                Files
+                                            </a>
                                             <form action="{{ route('integrations.destroy', $integration) }}" method="POST"
                                                 onsubmit="return confirm('Delete this file?');">
                                                 @csrf
@@ -962,42 +988,48 @@
                             }
                         }
                     }">
-                    
+
                     <div class="flex justify-between items-center mb-6">
                         <div>
                             <h3 class="text-lg font-bold text-gray-900">Remote Terminal</h3>
-                            <p class="text-sm text-gray-500">Execute commands on remote server via SSH. <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">Stateless</span></p>
+                            <p class="text-sm text-gray-500">Execute commands on remote server via SSH. <span
+                                    class="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">Stateless</span>
+                            </p>
                         </div>
                         <div class="flex gap-2">
-                             <button @click="history = []" class="text-xs text-gray-500 hover:text-gray-700 underline">Clear</button>
+                            <button @click="history = []"
+                                class="text-xs text-gray-500 hover:text-gray-700 underline">Clear</button>
                         </div>
                     </div>
 
-                    <div class="bg-gray-900 rounded-xl shadow-lg border border-gray-800 overflow-hidden font-mono text-xs p-4" @click="$refs.cmdInput.focus()">
+                    <div class="bg-gray-900 rounded-xl shadow-lg border border-gray-800 overflow-hidden font-mono text-xs p-4"
+                        @click="$refs.cmdInput.focus()">
                         <div x-ref="terminal" class="h-[500px] overflow-y-auto space-y-1 mb-2">
                             <template x-for="(entry, index) in history" :key="index">
                                 <div>
                                     <template x-if="entry.type === 'input'">
                                         <div class="text-green-400 font-bold mt-2">
-                                            <span class="text-blue-400" x-text="entry.cwd"></span> $ <span x-text="entry.content"></span>
+                                            <span class="text-blue-400" x-text="entry.cwd"></span> $ <span
+                                                x-text="entry.content"></span>
                                         </div>
                                     </template>
                                     <template x-if="entry.type === 'output'">
-                                        <div class="text-gray-300 whitespace-pre-wrap leading-relaxed pl-2" x-text="entry.content"></div>
+                                        <div class="text-gray-300 whitespace-pre-wrap leading-relaxed pl-2"
+                                            x-text="entry.content"></div>
                                     </template>
                                     <template x-if="entry.type === 'error'">
                                         <div class="text-red-400 pl-2" x-text="entry.content"></div>
                                     </template>
                                 </div>
                             </template>
-                            
+
                             <div x-show="loading" class="text-gray-500 animate-pulse pl-2">Executing...</div>
-                            
+
                             <div class="flex items-center text-green-400 font-bold mt-2">
-                                <span class="text-blue-400 mr-2" x-text="cwd"></span> $ 
-                                <input type="text" x-ref="cmdInput" x-model="command" 
-                                    @keydown="handleKeydown" @keydown.enter="execute()"
-                                    class="bg-transparent border-none outline-none text-gray-100 w-full focus:ring-0 p-0 ml-1" 
+                                <span class="text-blue-400 mr-2" x-text="cwd"></span> $
+                                <input type="text" x-ref="cmdInput" x-model="command" @keydown="handleKeydown"
+                                    @keydown.enter="execute()"
+                                    class="bg-transparent border-none outline-none text-gray-100 w-full focus:ring-0 p-0 ml-1"
                                     autofocus autocomplete="off" spellcheck="false">
                             </div>
                         </div>
@@ -1195,32 +1227,352 @@
 
             </div>
         </div>
+        <!-- File Manager Tab -->
+        <div x-show="tab === 'files'" class="mt-6">
+            <div class="bg-white shadow sm:rounded-lg" x-data="{
+            path: '.',
+            files: [],
+            loading: false,
+            currentFile: null,
+            fileContent: '',
+            editorLoading: false,
+            saving: false,
+            init() {
+                this.loadFiles();
+            },
+            async loadFiles() {
+                this.loading = true;
+                try {
+                    const response = await fetch(`{{ route('projects.files.index', $project) }}?path=${encodeURIComponent(this.path)}`);
+                    const data = await response.json();
+                    if (data.error) throw new Error(data.error);
+                    this.path = data.path;
+                    this.files = data.files;
+                } catch (e) {
+                    alert(e.message);
+                } finally {
+                    this.loading = false;
+                }
+            },
+            async openDirectory(dirName) {
+                if (dirName === '..') {
+                    // Logic to go up is handled by backend returning .. but visual nicety
+                    // Actually rawlist returns .. so we just click it
+                }
+                const newPath = this.path === '/' ? '/' + dirName : this.path + '/' + dirName;
+                this.path = newPath;
+                this.loadFiles();
+            },
+            async goUp() {
+                // Determine parent
+                const parts = this.path.split('/').filter(p => p);
+                parts.pop();
+                this.path = parts.length === 0 ? '/' : '/' + parts.join('/');
+                this.loadFiles();
+            },
+            async editFile(file) {
+                this.currentFile = file;
+                this.editorLoading = true;
+                try {
+                    const response = await fetch(`{{ route('projects.files.show', $project) }}?path=${encodeURIComponent(file.path)}`);
+                    const data = await response.json();
+                    if (data.error) throw new Error(data.error);
+                    this.fileContent = data.content;
+                } catch (e) {
+                    alert(e.message);
+                    this.currentFile = null;
+                } finally {
+                    this.editorLoading = false;
+                }
+            },
+            async saveFile() {
+                if (!this.currentFile) return;
+                this.saving = true;
+                try {
+                    const response = await fetch(`{{ route('projects.files.update', $project) }}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            path: this.currentFile.path,
+                            content: this.fileContent
+                        })
+                    });
+                    const data = await response.json();
+                    if (data.error) throw new Error(data.error);
+                    alert('File saved successfully');
+                } catch (e) {
+                    alert('Error saving file: ' + e.message);
+                } finally {
+                    this.saving = false;
+                }
+            },
+            formatSize(bytes) {
+                if (bytes === 0) return '0 B';
+                const k = 1024;
+                const sizes = ['B', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+        }">
+                <!-- Breadcrumb / Toolbar -->
+                <div
+                    class="border-b border-gray-200 px-4 py-4 sm:px-6 flex justify-between items-center bg-gray-50 rounded-t-lg">
+                    <div class="flex items-center space-x-2 overflow-hidden">
+                        <button @click="loadFiles" class="p-1 hover:bg-gray-200 rounded">
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                                </path>
+                            </svg>
+                        </button>
+                        <button @click="goUp" class="p-1 hover:bg-gray-200 rounded"
+                            :disabled="path === '/' || path === '.'">
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                            </svg>
+                        </button>
+                        <span class="font-mono text-sm text-gray-700 truncate" x-text="path"></span>
+                    </div>
+                </div>
+
+                <div class="flex h-[600px]">
+                    <!-- File List -->
+                    <div class="w-1/3 border-r border-gray-200 overflow-y-auto bg-white">
+                        <template x-if="loading">
+                            <div class="p-4 text-center text-gray-500">Loading...</div>
+                        </template>
+                        <ul role="list" class="divide-y divide-gray-100">
+                            <template x-for="file in files" :key="file.name">
+                                <li class="relative flex justify-between gap-x-6 px-4 py-3 hover:bg-gray-50 cursor-pointer"
+                                    @click="file.type === 'directory' ? openDirectory(file.name) : editFile(file)"
+                                    :class="currentFile && currentFile.name === file.name ? 'bg-indigo-50' : ''">
+                                    <div class="flex min-w-0 gap-x-4">
+                                        <div class="min-w-0 flex-auto">
+                                            <p class="text-sm font-semibold leading-6 text-gray-900 flex items-center">
+                                                <svg x-show="file.type === 'directory'"
+                                                    class="w-4 h-4 mr-2 text-yellow-500" fill="currentColor"
+                                                    viewBox="0 0 20 20">
+                                                    <path
+                                                        d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z">
+                                                    </path>
+                                                </svg>
+                                                <svg x-show="file.type === 'file'" class="w-4 h-4 mr-2 text-gray-400"
+                                                    fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd"
+                                                        d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
+                                                        clip-rule="evenodd" />
+                                                </svg>
+                                                <span x-text="file.name"></span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="hidden shrink-0 sm:flex sm:flex-col sm:items-end">
+                                        <p class="text-xs leading-5 text-gray-500"
+                                            x-text="file.type === 'file' ? formatSize(file.size) : ''"></p>
+                                    </div>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+
+                    <!-- Editor -->
+                    <div class="w-2/3 flex flex-col bg-gray-50">
+                        <template x-if="!currentFile">
+                            <div class="flex-1 flex items-center justify-center text-gray-400">
+                                Select a file to view/edit
+                            </div>
+                        </template>
+                        <template x-if="currentFile">
+                            <div class="flex-1 flex flex-col h-full">
+                                <div
+                                    class="bg-gray-100 border-b border-gray-200 px-4 py-2 flex justify-between items-center">
+                                    <span class="font-medium text-gray-700" x-text="currentFile.name"></span>
+                                    <button @click="saveFile"
+                                        class="bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-500 disabled:opacity-50"
+                                        :disabled="saving">
+                                        <span x-show="!saving">Save</span>
+                                        <span x-show="saving">Saving...</span>
+                                    </button>
+                                </div>
+                                <div class="flex-1 relative">
+                                    <template x-if="editorLoading">
+                                        <div class="absolute inset-0 bg-white/50 flex items-center justify-center z-10">
+                                            Loading content...</div>
+                                    </template>
+                                    <textarea x-model="fileContent"
+                                        class="w-full h-full p-4 font-mono text-sm bg-white focus:outline-none resize-none"
+                                        spellcheck="false"></textarea>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Terminal Tab -->
+        <div x-show="tab === 'terminal'" class="mt-6">
+            <div class="bg-white shadow sm:rounded-lg" x-data="{
+            command: '',
+            output: '',
+            history: [],
+            historyIndex: -1,
+            loading: false,
+            cwd: '/', // Current working directory
+            init() {
+                this.output = 'Welcome to the terminal. Type `help` for a list of commands.\\n';
+                this.executeCommand('pwd'); // Get initial CWD
+            },
+            async executeCommand(cmd = this.command) {
+                if (!cmd.trim()) return;
+
+                this.output += `\\n$ ${cmd}\\n`;
+                this.loading = true;
+
+                if (this.history[this.history.length - 1] !== cmd) {
+                    this.history.push(cmd);
+                }
+                this.historyIndex = this.history.length; // Reset history index
+
+                try {
+                    const response = await fetch(`{{ route('projects.terminal.execute', $project) }}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            command: cmd,
+                            cwd: this.cwd
+                        })
+                    });
+                    const data = await response.json();
+
+                    if (data.error) {
+                        this.output += `Error: ${data.error}\\n`;
+                    } else {
+                        this.output += data.output;
+                        if (data.newCwd) {
+                            this.cwd = data.newCwd;
+                        }
+                    }
+                } catch (e) {
+                    this.output += `Client-side error: ${e.message}\\n`;
+                } finally {
+                    this.command = '';
+                    this.loading = false;
+                    this.$nextTick(() => {
+                        this.$refs.terminalOutput.scrollTop = this.$refs.terminalOutput.scrollHeight;
+                    });
+                }
+            },
+            historyUp() {
+                if (this.history.length === 0) return;
+                if (this.historyIndex > 0) {
+                    this.historyIndex--;
+                    this.command = this.history[this.historyIndex];
+                }
+            },
+            historyDown() {
+                if (this.history.length === 0) return;
+                if (this.historyIndex < this.history.length - 1) {
+                    this.historyIndex++;
+                    this.command = this.history[this.historyIndex];
+                } else if (this.historyIndex === this.history.length - 1) {
+                    this.historyIndex++;
+                    this.command = '';
+                }
+            },
+            autocomplete() {
+                if (!this.command) return;
+                
+                // Super basic autocomplete
+                fetch('{{ route('projects.terminal.autocomplete', $project) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        input: this.command,
+                        cwd: this.cwd
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.length === 1) {
+                        // If one match, autocomplete it
+                        // We need to know what part to replace. 
+                        // Simplified: if command is just " cd Do", we replace "Do" with "Downloads/" // But input
+                usually includes the full command "cd Do" . // Logic: find the last word? // Let's assume user types
+                full path or filename. // Simple approach: if output starts with input, use output? // No, `compgen`
+                returns just the match name usually. // Current backend returns list of matches (basename usually). //
+                If I typed "nano .e" , I get ".env" . // I want "nano .env" . const match=data[0]; const
+                parts=this.command.split(' ');
+                        const lastPart = parts.pop();
+                        
+                        // If match completes lastPart
+                        if (match.startsWith(lastPart)) {
+                             parts.push(match);
+                             this.command = parts.join(' ');
+                        } else {
+                            // Maybe it was a path /var/www/htm -> html
+                            // For now, let' s just append or replace last token if it looks like a prefix
+                parts.push(match); this.command=parts.join(' ');
+                        }
+                    } else if (data.length > 1) {
+                         // internal log to terminal
+                         this.output += `\n${data.join(' ')}\n`;
+                    }
+                });
+            }
+        }">
+            <!-- Terminal Display -->
+            <div class="h-96 w-full bg-black text-green-400 font-mono p-4 rounded-t-lg overflow-y-auto whitespace-pre-wrap text-sm border-b border-gray-700 shadow-inner"
+                 x-ref="terminalOutput" x-html="output"></div>
+            
+            <!-- Command Input -->
+            <div class="flex items-center bg-gray-900 rounded-b-lg p-2 border-t border-gray-700">
+                <span class="text-green-500 font-mono mr-2 ml-2">$</span>
+                <input type="text" 
+                       x-model="command" 
+                       @keydown.enter="executeCommand"
+                       @keydown.up.prevent="historyUp"
+                       @keydown.down.prevent="historyDown"
+                       @keydown.tab.prevent="autocomplete"
+                       class="flex-1 bg-transparent border-none text-gray-200 focus:ring-0 font-mono text-sm placeholder-gray-600"
+                       placeholder="Type command..."
+                       autofocus>
+                <div x-show="loading" class="animate-spin h-4 w-4 text-green-500 mr-2">
+                    <svg class="h-full w-full" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
 </x-app-layout>
 
 <!-- Scripts for D&D -->
 <script>
     function updateTaskStatus(event, status) {
         event.preventDefault();
-        const taskId = event.dataTransfer.getData('text/plain');
-
-        fetch(`/tasks/${taskId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                _method: 'PUT',
-                status: status
-            })
-        })
-            .then(response => {
-                if (response.ok) {
-                    window.location.reload();
-                } else {
-                    alert('Failed to update task status');
-                }
-            });
+        const taskId = event.dataTransfer.getData(' text/plain'); fetch(`/tasks/${taskId}`, {
+            method: 'POST', headers:
+            {
+                'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept'
+                    : 'application/json'
+            }, body: JSON.stringify({ _method: 'PUT', status: status })
+        }).then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Failed to update task status');
+            }
+        });
     }
 </script>

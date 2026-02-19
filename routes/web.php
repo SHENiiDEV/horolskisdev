@@ -40,6 +40,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/projects/{project}/vaults/import', [\App\Http\Controllers\ProjectController::class, 'importVault'])->name('projects.vaults.import');
     Route::get('/projects/{project}/logs/stream', [\App\Http\Controllers\ProjectLogController::class, 'stream'])->name('projects.logs.stream');
     Route::post('/projects/{project}/terminal', [\App\Http\Controllers\ProjectTerminalController::class, 'execute'])->name('projects.terminal.execute');
+    Route::post('/projects/{project}/terminal/autocomplete', [\App\Http\Controllers\ProjectTerminalController::class, 'autocomplete'])->name('projects.terminal.autocomplete');
+
+    // File Manager
+    Route::get('/projects/{project}/files', [\App\Http\Controllers\ProjectFileController::class, 'index'])->name('projects.files.index');
+    Route::get('/projects/{project}/files/content', [\App\Http\Controllers\ProjectFileController::class, 'show'])->name('projects.files.show');
+    Route::post('/projects/{project}/files/update', [\App\Http\Controllers\ProjectFileController::class, 'update'])->name('projects.files.update');
 
     Route::post('/vaults/share', [\App\Http\Controllers\VaultShareController::class, 'store'])->name('vault-shares.store');
     Route::resource('time-entries', \App\Http\Controllers\TimeEntryController::class)->only(['index', 'update', 'destroy']);
