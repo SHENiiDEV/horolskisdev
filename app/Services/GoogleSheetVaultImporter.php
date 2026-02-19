@@ -5,82 +5,82 @@ namespace App\Services;
 use App\Models\Project;
 use App\Models\Vault;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class GoogleSheetVaultImporter
 {
-    public function import(string $url, Project $project)
+    /**
+     * Импорт данных из Google Sheets в Vault проекта.
+     */
+    public function import(string $url, Project $project): int
     {
-        // 1. Transform URL to export format
+        // 1. Превращаем URL в формат экспорта CSV
         $csvUrl = $this->transformUrlToCsv($url);
 
-        // 2. Fetch CSV
+        // 2. Получаем CSV данные
         $response = Http::get($csvUrl);
 
         if ($response->failed()) {
-            \Log::error('Google Sheet Import HTTP Error', ['status' => $response->status(), 'url' => $csvUrl]);
-            throw new \Exception('Failed to fetch Google Sheet. Status: ' . $response->status());
+            Log::error('Google Sheet Import HTTP Error', ['status' => $response->status(), 'url' => $csvUrl]);
+            throw new \Exception('Не удалось получить данные из Google Sheet. Статус: ' . $response->status());
         }
 
         $contentType = $response->header('Content-Type');
         $body = $response->body();
 
-        // Check if response is HTML (login page likely)
-        if (str_contains(strtolower($contentType), 'html') || str_contains($body, '<!doctype html') || str_contains($body, '<html')) {
-            \Log::error('Google Sheet Import: Received HTML instead of CSV', ['preview' => substr($body, 0, 500)]);
-            throw new \Exception("The Google Sheet URL returned HTML instead of CSV. Please ensure 'Anyone with the link' can view.");
+        // Проверка, не получили ли мы HTML (страница логина Google) вместо CSV
+        if (str_contains(strtolower($contentType), 'html') || str_contains($body, '<!doctype html')) {
+            throw new \Exception("URL вернул HTML вместо CSV. Убедитесь, что доступ к таблице открыт 'Всем, у кого есть ссылка'.");
         }
 
-        $csvData = $body;
-        $rows = array_map('str_getcsv', explode("\n", $csvData));
-
-        \Log::info('Google Sheet Import Rows', ['count' => count($rows), 'header_row' => $rows[0] ?? null]);
-
-
-        // Remove header if it exists (heuristic: check for common header keywords)
-        if (isset($rows[0])) {
-            $firstrow = array_map('strtolower', $rows[0]);
-            $keywords = ['email', 'pass', 'username', 'service', 'phone', 'extra'];
-            foreach ($firstrow as $cell) {
-                foreach ($keywords as $keyword) {
-                    if (Str::contains($cell, $keyword)) {
-                        array_shift($rows);
-                        break 2;
-                    }
-                }
-            }
-        }
-
+        $rows = array_map('str_getcsv', explode("\n", $body));
         $count = 0;
+
         foreach ($rows as $row) {
-            if (count($row) < 3)
-                continue; // Skip empty or invalid rows
+            // Очищаем каждый элемент строки от лишних пробелов
+            $row = array_map('trim', $row);
 
-            $service = trim($row[0] ?? '');
-            $col2 = trim($row[1] ?? ''); // Username/Email
-            $col3 = trim($row[2] ?? ''); // Password
-            $col4 = trim($row[3] ?? ''); // Extra (Phone/URL)
+            // Согласно вашему файлу:
+            // [0] - обычно пусто
+            // [1] - Название сервиса (Gmail, Namecheap, WP и т.д.)
+            // [2] - Email / Username
+            // [3] - Password
+            // [4] - Phone / URL
 
-            if (empty($service))
+            $service = $row[1] ?? '';
+            $username = $row[2] ?? '';
+            $password = $row[3] ?? '';
+            $extra = $row[4] ?? '';
+
+            // Пропускаем строки заголовков или пустые строки
+            if (empty($service) || empty($password)) {
                 continue;
+            }
 
-            $this->createVaultEntry($project, $service, $col2, $col3, $col4);
+            // Игнорируем технические строки (например, если в ячейке написано "email" или "pass")
+            if (in_array(strtolower($service), ['service', 'email', 'namecheap', 'gmail', 'privateemail', 'wp'])) {
+                if (in_array(strtolower($username), ['email', 'username', 'pass']))
+                    continue;
+            }
+
+            $this->createVaultEntry($project, $service, $username, $password, $extra);
             $count++;
         }
 
         return $count;
     }
 
+    /**
+     * Преобразование ссылки Google Sheets в ссылку для прямого скачивания CSV.
+     */
     private function transformUrlToCsv(string $url): string
     {
-        // https://docs.google.com/spreadsheets/d/ID/edit?gid=0#gid=0 -> /export?format=csv&gid=0
-
-        // simple regex to extract ID and GID
         preg_match('/spreadsheets\/d\/([a-zA-Z0-9-_]+)/', $url, $matches);
         $id = $matches[1] ?? null;
 
         if (!$id) {
-            throw new \Exception('Invalid Google Sheet URL.');
+            throw new \Exception('Некорректная ссылка на Google Sheet.');
         }
 
         $gid = '0';
@@ -91,6 +91,9 @@ class GoogleSheetVaultImporter
         return "https://docs.google.com/spreadsheets/d/{$id}/export?format=csv&gid={$gid}";
     }
 
+    /**
+     * Создание записи в Vault с правильным маппингом полей.
+     */
     private function createVaultEntry(Project $project, string $service, string $username, string $password, string $extra)
     {
         $type = 'other';
@@ -107,36 +110,29 @@ class GoogleSheetVaultImporter
             ];
         } elseif (Str::contains($lowerService, 'namecheap')) {
             $type = 'hosting';
+            $name = 'Namecheap';
             $payload = [
                 ['name' => 'Username', 'value' => $username, 'is_secret' => false],
                 ['name' => 'Password', 'value' => $password, 'is_secret' => true],
-                ['name' => 'Login URL', 'value' => 'https://www.namecheap.com/myaccount/login/?ReturnUrl=%2f', 'is_secret' => false],
+                ['name' => 'Login URL', 'value' => 'https://www.namecheap.com/myaccount/login/', 'is_secret' => false],
             ];
         } elseif (Str::contains($lowerService, 'privateemail')) {
             $type = 'email';
-            $name = 'Private Email'; // Normalize name? Or keep "privateemail"? User used "privateemail" in lower case in example. 
-            // User example: "privateemail" -> "info@..."
-            // Let's keep formatted name if possible, or just use input. 
-            // User said: "primateemail [sic] это будет email"
-            if ($lowerService === 'privateemail')
-                $name = 'Private Email';
-
+            $name = 'Private Email';
             $payload = [
                 ['name' => 'Email', 'value' => $username, 'is_secret' => false],
                 ['name' => 'Password', 'value' => $password, 'is_secret' => true],
             ];
-        } elseif (Str::contains($lowerService, 'wp') || Str::contains($lowerService, 'wordpress')) {
+        } elseif ($lowerService === 'wp' || Str::contains($lowerService, 'wordpress')) {
             $type = 'wordpress';
-            $name = 'Wordpress Admin Login';
+            $name = 'WordPress Admin';
 
-            // "ссылка может братся из проекта и добавлятся /wp-admin"
-            // If extra is empty, use project domain + /wp-admin
+            // Если URL не указан, берем домен проекта
             $loginUrl = $extra;
             if (empty($loginUrl) && $project->domain) {
-                $loginUrl = rtrim($project->domain, '/') . '/wp-admin';
-                if (!Str::startsWith($loginUrl, 'http')) {
-                    $loginUrl = 'https://' . $loginUrl;
-                }
+                $domain = rtrim($project->domain, '/');
+                $loginUrl = str_starts_with($domain, 'http') ? $domain : "https://{$domain}";
+                $loginUrl .= '/wp-admin';
             }
 
             $payload = [
@@ -145,20 +141,22 @@ class GoogleSheetVaultImporter
                 ['name' => 'Login URL', 'value' => $loginUrl, 'is_secret' => false],
             ];
         } else {
-            // Default fallback
+            // Универсальный вариант для прочих сервисов
             $payload = [
                 ['name' => 'Username', 'value' => $username, 'is_secret' => false],
                 ['name' => 'Password', 'value' => $password, 'is_secret' => true],
-                ['name' => 'Extra', 'value' => $extra, 'is_secret' => false],
             ];
+            if (!empty($extra)) {
+                $payload[] = ['name' => 'Extra', 'value' => $extra, 'is_secret' => false];
+            }
         }
 
-        // Create Vault
-        Vault::create([
+        // Создаем запись в БД
+        return Vault::create([
             'project_id' => $project->id,
             'name' => $name,
             'type' => $type,
-            'payload' => $payload, // The model casts this to encrypted JSON
+            'payload' => $payload, // Поле должно быть cast к array или json в модели
         ]);
     }
 }
