@@ -211,15 +211,15 @@
                         </svg>
                         Logs
                     </button>
-                    <button @click="tab = 'server-logs'"
-                        :class="tab === 'server-logs' ? 'bg-white text-gray-900 shadow' : 'text-gray-500 hover:text-gray-900'"
+                    <button @click="tab = 'terminal'"
+                        :class="tab === 'terminal' ? 'bg-white text-gray-900 shadow' : 'text-gray-500 hover:text-gray-900'"
                         class="flex w-full items-center justify-center rounded-lg py-2.5 text-sm font-medium leading-5 ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2 select-none transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="w-4 h-4 mr-2">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
                         </svg>
-                        Server Logs
+                        Terminal
                     </button>
 
                 </nav>
@@ -884,7 +884,8 @@
                 </div>
 
                 <!-- Terminal Tab ->
-                <div x-show="tab === 'server-logs'" style="display: none;"
+                <!-- Terminal Tab -->
+                <div x-show="tab === 'terminal'" style="display: none;"
                     class="animate-in fade-in slide-in-from-bottom-4 duration-500" x-data="{
                         history: [],
                         command: '',
