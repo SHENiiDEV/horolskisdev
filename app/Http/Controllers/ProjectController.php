@@ -9,7 +9,7 @@ class ProjectController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $query = \App\Models\Project::with('client')->withCount('tasks')->latest();
 
@@ -17,7 +17,19 @@ class ProjectController extends Controller
             $query->where('client_id', auth()->user()->client_id);
         }
 
-        $projects = $query->paginate(15);
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('domain', 'like', "%{$search}%")
+                    ->orWhereHas('client', function ($qClient) use ($search) {
+                        $qClient->where('name', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $projects = $query->paginate(15)->withQueryString();
+
         return view('projects.index', compact('projects'));
     }
 
