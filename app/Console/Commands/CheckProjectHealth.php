@@ -50,9 +50,17 @@ class CheckProjectHealth extends Command
                 try {
                     $response = Http::withHeaders([
                         'User-Agent' => 'HorolskisBot',
-                        'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-                        'Connection' => 'close',
+                        'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+                        'Accept-Language' => 'en-US,en;q=0.9',
+                        'Connection' => 'keep-alive',
                     ])
+                        ->withoutVerifying()
+                        ->withOptions([
+                            'curl' => [
+                                CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+                            ],
+                        ])
+                        ->connectTimeout(15)
                         ->timeout(30)
                         ->get($url);
 
