@@ -15,6 +15,14 @@ class ProjectController extends Controller
 
         if (auth()->user()->isClient()) {
             $query->where('client_id', auth()->user()->client_id);
+            $clients = collect(); // Clients don't need the filter dropdown
+        } else {
+            $clients = \App\Models\Client::orderBy('name')->get();
+
+            // Client Filter for Admins
+            if ($request->filled('client_id')) {
+                $query->where('client_id', $request->client_id);
+            }
         }
 
         if ($request->filled('search')) {
@@ -30,7 +38,7 @@ class ProjectController extends Controller
 
         $projects = $query->paginate(15)->withQueryString();
 
-        return view('projects.index', compact('projects'));
+        return view('projects.index', compact('projects', 'clients'));
     }
 
     /**
