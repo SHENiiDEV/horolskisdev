@@ -273,6 +273,7 @@
                                   if (!response.ok) throw new Error('Failed to generate link');
                                   const data = await response.json();
                                   this.shareResult = data;
+                                  this.generatedLink = data.link;
                               } catch (error) { console.error(error); showToast('Error generating link.', 'error'); }
                         }
                     }">

@@ -179,7 +179,7 @@
 
                     <div class="flex gap-3">
                         <button type="button" id="copy-all-btn"
-                            onclick="copyToClipboard('{{ $secretType === 'json' ? json_encode($secretFields) : addslashes($secret) }}', 'copy-all-btn')"
+                            onclick="try { const fields = JSON.parse('{{ addslashes($secretType === 'json' ? json_encode($secretFields) : $secret) }}'); let text = ''; if(Array.isArray(fields)) { text = fields.map(f => `${f.name}: ${f.value}`).join('\n'); } else { text = '{{ addslashes($secret) }}'; } copyToClipboard(text, 'copy-all-btn'); } catch(e) { copyToClipboard('{{ addslashes($secret) }}', 'copy-all-btn'); }"
                             class="flex-1 rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 flex justify-center items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor" class="w-4 h-4">
