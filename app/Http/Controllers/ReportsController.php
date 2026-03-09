@@ -123,14 +123,25 @@ class ReportsController extends Controller
             ? Carbon::parse($request->input('date_to'))->endOfDay()
             : Carbon::now()->endOfDay();
 
-        // Load all projects with their tasks filtered by period (updated_at or created_at)
-        $projects = Project::with([
+        $clientId = $request->input('client_id');
+        $clients = \App\Models\Client::orderBy('name')->get();
+
+        // Build project query with optional client filter
+        $query = Project::with([
             'client',
             'tasks' => function ($q) use ($dateFrom, $dateTo) {
-                $q->whereBetween('updated_at', [$dateFrom, $dateTo])
-                    ->orWhereBetween('created_at', [$dateFrom, $dateTo]);
+                $q->where(function ($sub) use ($dateFrom, $dateTo) {
+                    $sub->whereBetween('updated_at', [$dateFrom, $dateTo])
+                        ->orWhereBetween('created_at', [$dateFrom, $dateTo]);
+                });
             }
-        ])->get()
+        ]);
+
+        if ($clientId) {
+            $query->where('client_id', $clientId);
+        }
+
+        $projects = $query->get()
             ->filter(fn($p) => $p->tasks->count() > 0)
             ->map(function ($project) {
                 $tasks = $project->tasks;
@@ -148,7 +159,6 @@ class ReportsController extends Controller
                 ];
             })->values();
 
-        // Summary totals
         $summary = [
             'projects' => $projects->count(),
             'total_tasks' => $projects->sum('total'),
@@ -157,6 +167,13 @@ class ReportsController extends Controller
             'pending' => $projects->sum('pending'),
         ];
 
-        return view('reports.task-progress', compact('projects', 'summary', 'dateFrom', 'dateTo'));
+        return view('reports.task-progress', compact(
+            'projects',
+            'summary',
+            'dateFrom',
+            'dateTo',
+            'clients',
+            'clientId'
+        ));
     }
 }

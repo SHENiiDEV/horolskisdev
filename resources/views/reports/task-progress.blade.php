@@ -59,13 +59,34 @@
                                 value="{{ request('date_to', $dateTo->format('Y-m-d')) }}"
                                 class="rounded-lg border-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500">
                         </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Client</label>
+                            <select name="client_id"
+                                class="rounded-lg border-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500 min-w-[160px]">
+                                <option value="">All Clients</option>
+                                @foreach ($clients as $client)
+                                    <option value="{{ $client->id }}" {{ $clientId == $client->id ? 'selected' : '' }}>
+                                        {{ $client->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                         <button type="submit"
                             class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 transition">
                             Apply
                         </button>
+                        @if ($clientId)
+                            <a href="{{ route('reports.task-progress', array_filter(['date_from' => request('date_from'), 'date_to' => request('date_to')])) }}"
+                                class="px-3 py-2 text-xs font-semibold text-gray-500 hover:text-red-500 transition flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                Clear filter
+                            </a>
+                        @endif
                     </div>
 
-                    {{-- Quick period buttons --}}
+                    {{-- Quick period buttons (preserve client filter) --}}
                     <div class="flex flex-wrap gap-2 mt-4">
                         @php
                             $quick = [
@@ -79,8 +100,9 @@
                         @foreach ($quick as $label => [$from, $to])
                             @php
                                 $isActive = request('date_from') === $from && request('date_to') === $to;
+                                $params   = array_filter(['date_from' => $from, 'date_to' => $to, 'client_id' => $clientId]);
                             @endphp
-                            <a href="{{ route('reports.task-progress', ['date_from' => $from, 'date_to' => $to]) }}"
+                            <a href="{{ route('reports.task-progress', $params) }}"
                                 class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition
                                     {{ $isActive
                                         ? 'bg-indigo-600 text-white border-indigo-600'
@@ -91,6 +113,7 @@
                     </div>
                 </form>
             </div>
+
 
             {{-- Summary Cards --}}
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
