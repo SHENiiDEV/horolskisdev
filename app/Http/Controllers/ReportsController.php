@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Invoice;
 use App\Models\Project;
+use App\Models\Task;
 use App\Models\TimeEntry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -110,5 +111,52 @@ class ReportsController extends Controller
                 'potential_value' => round($potentialValue, 2)
             ]
         ]);
+    }
+
+    public function taskProgress(Request $request)
+    {
+        $dateFrom = $request->input('date_from')
+            ? Carbon::parse($request->input('date_from'))->startOfDay()
+            : Carbon::now()->startOfMonth()->startOfDay();
+
+        $dateTo = $request->input('date_to')
+            ? Carbon::parse($request->input('date_to'))->endOfDay()
+            : Carbon::now()->endOfDay();
+
+        // Load all projects with their tasks filtered by period (updated_at or created_at)
+        $projects = Project::with([
+            'client',
+            'tasks' => function ($q) use ($dateFrom, $dateTo) {
+                $q->whereBetween('updated_at', [$dateFrom, $dateTo])
+                    ->orWhereBetween('created_at', [$dateFrom, $dateTo]);
+            }
+        ])->get()
+            ->filter(fn($p) => $p->tasks->count() > 0)
+            ->map(function ($project) {
+                $tasks = $project->tasks;
+                return [
+                    'id' => $project->id,
+                    'name' => $project->name,
+                    'domain' => $project->domain,
+                    'status' => $project->status,
+                    'client' => $project->client?->name,
+                    'tasks' => $tasks,
+                    'done' => $tasks->where('status', 'done')->count(),
+                    'in_progress' => $tasks->where('status', 'in_progress')->count(),
+                    'pending' => $tasks->where('status', 'pending')->count(),
+                    'total' => $tasks->count(),
+                ];
+            })->values();
+
+        // Summary totals
+        $summary = [
+            'projects' => $projects->count(),
+            'total_tasks' => $projects->sum('total'),
+            'done' => $projects->sum('done'),
+            'in_progress' => $projects->sum('in_progress'),
+            'pending' => $projects->sum('pending'),
+        ];
+
+        return view('reports.task-progress', compact('projects', 'summary', 'dateFrom', 'dateTo'));
     }
 }

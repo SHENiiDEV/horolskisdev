@@ -69,6 +69,7 @@ Route::middleware('auth')->group(function () {
     // Reports / Analytics
     Route::get('/reports', [\App\Http\Controllers\ReportsController::class, 'index'])->name('reports.index');
     Route::get('/reports/data', [\App\Http\Controllers\ReportsController::class, 'data'])->name('reports.data');
+    Route::get('/reports/task-progress', [\App\Http\Controllers\ReportsController::class, 'taskProgress'])->name('reports.task-progress');
 
     // Server Status
     Route::get('/monitors', [\App\Http\Controllers\ServerStatusController::class, 'index'])->name('server-status.index');
