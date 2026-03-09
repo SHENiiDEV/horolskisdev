@@ -1,15 +1,72 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Task Progress') }}
-        </h2>
+        <div class="flex items-center justify-between">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ __('Task Progress') }}
+            </h2>
+            <button onclick="exportPDF()"
+                class="no-print inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 active:scale-95 transition-all shadow-sm">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.75 19.77m10.56-5.941l-.72 5.882M10.5 5.25a7.5 7.5 0 017.5 7.5h-7.5V5.25zM3.75 5.25a7.5 7.5 0 017.5 7.5.75.75 0 01-.75.75H3a.75.75 0 01-.75-.75V5.25z" />
+                </svg>
+                Export PDF
+            </button>
+        </div>
     </x-slot>
+
+    {{-- Print styles --}}
+    <style>
+        @media print {
+            /* Hide nav, sidebar, filter panel, buttons */
+            .no-print,
+            nav,
+            aside,
+            header form,
+            #period-form { display: none !important; }
+
+            /* PDF title block */
+            .print-title { display: block !important; }
+
+            /* Force all accordion rows visible */
+            [x-show] { display: table-row !important; }
+            [x-cloak] { display: table-row !important; }
+
+            /* Remove shadows / rounded corners */
+            .shadow-sm, .sm\:rounded-xl { box-shadow: none !important; border-radius: 0 !important; }
+
+            /* Page breaks */
+            tbody tr { page-break-inside: avoid; }
+            .bg-white { background: #fff !important; }
+
+            /* Expand chevrons to point down */
+            .chevron-icon { transform: rotate(90deg) !important; }
+
+            /* Progress bar — use border trick since bg colors may not print */
+            .progress-bar { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+            body { font-size: 11px; }
+        }
+
+        /* Hidden outside print */
+        .print-title { display: none; }
+    </style>
 
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
+            {{-- Print-only title --}}
+            <div class="print-title mb-4">
+                <h1 class="text-2xl font-bold text-gray-900">Task Progress Report</h1>
+                <p class="text-sm text-gray-500 mt-1">
+                    Period: {{ $dateFrom->format('d M Y') }} — {{ $dateTo->format('d M Y') }}
+                    &nbsp;·&nbsp; Generated: {{ now()->format('d M Y H:i') }}
+                </p>
+                <hr class="mt-3 border-gray-300">
+            </div>
+
             {{-- Period Filter --}}
-            <div class="bg-white shadow-sm sm:rounded-xl p-6">
+            <div class="bg-white shadow-sm sm:rounded-xl p-6 no-print">
                 <form method="GET" action="{{ route('reports.task-progress') }}" id="period-form">
                     <div class="flex flex-wrap items-end gap-4">
                         <div>
@@ -34,11 +91,11 @@
                     <div class="flex flex-wrap gap-2 mt-4">
                         @php
                             $quick = [
-                                'This Month'   => [now()->startOfMonth()->format('Y-m-d'), now()->format('Y-m-d')],
-                                'Last Month'   => [now()->subMonth()->startOfMonth()->format('Y-m-d'), now()->subMonth()->endOfMonth()->format('Y-m-d')],
-                                'Last 3 Months'=> [now()->subMonths(3)->startOfMonth()->format('Y-m-d'), now()->format('Y-m-d')],
-                                'This Year'    => [now()->startOfYear()->format('Y-m-d'), now()->format('Y-m-d')],
-                                'All Time'     => ['2000-01-01', now()->format('Y-m-d')],
+                                'This Month'    => [now()->startOfMonth()->format('Y-m-d'), now()->format('Y-m-d')],
+                                'Last Month'    => [now()->subMonth()->startOfMonth()->format('Y-m-d'), now()->subMonth()->endOfMonth()->format('Y-m-d')],
+                                'Last 3 Months' => [now()->subMonths(3)->startOfMonth()->format('Y-m-d'), now()->format('Y-m-d')],
+                                'This Year'     => [now()->startOfYear()->format('Y-m-d'), now()->format('Y-m-d')],
+                                'All Time'      => ['2000-01-01', now()->format('Y-m-d')],
                             ];
                         @endphp
                         @foreach ($quick as $label => [$from, $to])
@@ -61,11 +118,11 @@
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                 @php
                     $cards = [
-                        ['label' => 'Projects', 'value' => $summary['projects'], 'color' => 'indigo', 'icon' => 'M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776'],
-                        ['label' => 'Total Tasks', 'value' => $summary['total_tasks'], 'color' => 'blue', 'icon' => 'M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z'],
-                        ['label' => 'Done', 'value' => $summary['done'], 'color' => 'green', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
-                        ['label' => 'In Progress', 'value' => $summary['in_progress'], 'color' => 'yellow', 'icon' => 'M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z'],
-                        ['label' => 'Pending', 'value' => $summary['pending'], 'color' => 'gray', 'icon' => 'M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+                        ['label' => 'Projects',     'value' => $summary['projects'],    'color' => 'indigo',  'icon' => 'M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776'],
+                        ['label' => 'Total Tasks',  'value' => $summary['total_tasks'], 'color' => 'blue',   'icon' => 'M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z'],
+                        ['label' => 'Done',         'value' => $summary['done'],        'color' => 'green',  'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                        ['label' => 'In Progress',  'value' => $summary['in_progress'], 'color' => 'yellow', 'icon' => 'M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z'],
+                        ['label' => 'Pending',      'value' => $summary['pending'],     'color' => 'gray',   'icon' => 'M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
                     ];
                 @endphp
                 @foreach ($cards as $card)
@@ -75,7 +132,7 @@
                         @elseif($card['color'] === 'green') border-green-500
                         @elseif($card['color'] === 'yellow') border-yellow-500
                         @else border-gray-400 @endif">
-                        <div class="p-2 rounded-lg
+                        <div class="p-2 rounded-lg no-print
                             @if($card['color'] === 'indigo') bg-indigo-50 text-indigo-600
                             @elseif($card['color'] === 'blue') bg-blue-50 text-blue-600
                             @elseif($card['color'] === 'green') bg-green-50 text-green-600
@@ -115,7 +172,7 @@
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Project</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:table-cell">Client</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Client</th>
                                 <th class="px-4 py-3 text-center text-xs font-semibold text-green-600 uppercase tracking-wider">Done</th>
                                 <th class="px-4 py-3 text-center text-xs font-semibold text-yellow-600 uppercase tracking-wider">In Progress</th>
                                 <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Pending</th>
@@ -126,28 +183,24 @@
                         <tbody class="divide-y divide-gray-50" x-data="{ open: null }">
                             @foreach ($projects as $index => $project)
                                 @php $pct = $project['total'] > 0 ? round($project['done'] / $project['total'] * 100) : 0; @endphp
+
                                 {{-- Project Row --}}
                                 <tr class="hover:bg-gray-50 cursor-pointer transition-colors"
                                     @click="open = (open === {{ $index }}) ? null : {{ $index }}">
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
-                                            {{-- Expand chevron --}}
-                                            <svg class="w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200"
+                                            <svg class="w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200 chevron-icon no-print"
                                                 :class="open === {{ $index }} ? 'rotate-90' : ''"
                                                 fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                                             </svg>
                                             <div>
                                                 <div class="flex items-center gap-2">
-                                                    <a href="{{ route('projects.show', $project['id']) }}"
-                                                        class="font-semibold text-gray-800 hover:text-indigo-600 transition-colors"
-                                                        @click.stop>
-                                                        {{ $project['name'] }}
-                                                    </a>
+                                                    <span class="font-semibold text-gray-800">{{ $project['name'] }}</span>
                                                     @if ($project['domain'])
                                                         <a href="{{ Str::startsWith($project['domain'], 'http') ? $project['domain'] : 'https://' . $project['domain'] }}"
                                                             target="_blank"
-                                                            class="text-gray-400 hover:text-indigo-500 transition-colors"
+                                                            class="text-gray-400 hover:text-indigo-500 transition-colors no-print"
                                                             title="Open website"
                                                             @click.stop>
                                                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -162,7 +215,7 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 hidden sm:table-cell">
+                                    <td class="px-6 py-4">
                                         <span class="text-sm text-gray-500">{{ $project['client'] ?? '—' }}</span>
                                     </td>
                                     <td class="px-4 py-4 text-center">
@@ -188,7 +241,7 @@
                                     <td class="px-4 py-4">
                                         <div class="flex items-center gap-2 min-w-[90px]">
                                             <div class="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
-                                                <div class="h-2 rounded-full transition-all duration-500
+                                                <div class="h-2 rounded-full progress-bar transition-all duration-500
                                                     @if($pct === 100) bg-green-500
                                                     @elseif($pct >= 50) bg-indigo-500
                                                     @else bg-yellow-400 @endif"
@@ -200,32 +253,29 @@
                                     </td>
                                 </tr>
 
-                                {{-- Expanded Task List --}}
-                                <tr x-show="open === {{ $index }}" x-cloak>
+                                {{-- Expanded Task List — always visible in print --}}
+                                <tr x-show="open === {{ $index }}" x-cloak class="print-accordion-row">
                                     <td colspan="7" class="px-0 py-0 bg-gray-50">
                                         <div class="border-t border-b border-gray-100">
                                             <table class="min-w-full">
                                                 <thead>
-                                                    <tr class="bg-gray-100/70">
-                                                        <th class="pl-16 pr-4 py-2 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Task</th>
-                                                        <th class="px-4 py-2 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider hidden md:table-cell">Type</th>
+                                                    <tr class="bg-gray-100">
+                                                        <th class="pl-12 pr-4 py-2 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Task</th>
+                                                        <th class="px-4 py-2 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Type</th>
                                                         <th class="px-4 py-2 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
-                                                        <th class="px-4 py-2 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider hidden sm:table-cell">Updated</th>
+                                                        <th class="px-4 py-2 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">Updated</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody class="divide-y divide-gray-100">
                                                     @foreach ($project['tasks'] as $task)
                                                         <tr class="hover:bg-white transition-colors">
-                                                            <td class="pl-16 pr-4 py-3">
-                                                                <a href="{{ route('tasks.show', $task->id) }}"
-                                                                    class="text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors">
-                                                                    {{ $task->title }}
-                                                                </a>
+                                                            <td class="pl-12 pr-4 py-3">
+                                                                <span class="text-sm font-medium text-gray-700">{{ $task->title }}</span>
                                                                 @if ($task->description)
                                                                     <p class="text-xs text-gray-400 mt-0.5 line-clamp-1">{{ $task->description }}</p>
                                                                 @endif
                                                             </td>
-                                                            <td class="px-4 py-3 hidden md:table-cell">
+                                                            <td class="px-4 py-3">
                                                                 <span class="text-xs text-gray-400 capitalize">{{ $task->pricing_type ?? '—' }}</span>
                                                             </td>
                                                             <td class="px-4 py-3">
@@ -246,7 +296,7 @@
                                                                     </span>
                                                                 @endif
                                                             </td>
-                                                            <td class="px-4 py-3 text-right hidden sm:table-cell">
+                                                            <td class="px-4 py-3 text-right">
                                                                 <span class="text-xs text-gray-400">{{ $task->updated_at->format('d M Y') }}</span>
                                                             </td>
                                                         </tr>
@@ -264,4 +314,20 @@
 
         </div>
     </div>
+
+    <script>
+        function exportPDF() {
+            // Before printing: force-show all accordion rows
+            document.querySelectorAll('.print-accordion-row').forEach(el => {
+                el.style.display = 'table-row';
+            });
+
+            window.print();
+
+            // After print dialog closes: restore Alpine.js driven visibility
+            document.querySelectorAll('.print-accordion-row').forEach(el => {
+                el.style.display = '';
+            });
+        }
+    </script>
 </x-app-layout>
