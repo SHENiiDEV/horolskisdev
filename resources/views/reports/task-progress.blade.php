@@ -15,40 +15,18 @@
         </div>
     </x-slot>
 
-    {{-- Print styles --}}
+    {{-- Print / PDF styles --}}
     <style>
         @media print {
-            /* Hide nav, sidebar, filter panel, buttons */
             .no-print,
-            nav,
-            aside,
-            header form,
-            #period-form { display: none !important; }
-
-            /* PDF title block */
+            nav, aside, #period-form { display: none !important; }
             .print-title { display: block !important; }
-
-            /* Force all accordion rows visible */
-            [x-show] { display: table-row !important; }
-            [x-cloak] { display: table-row !important; }
-
-            /* Remove shadows / rounded corners */
             .shadow-sm, .sm\:rounded-xl { box-shadow: none !important; border-radius: 0 !important; }
-
-            /* Page breaks */
             tbody tr { page-break-inside: avoid; }
             .bg-white { background: #fff !important; }
-
-            /* Expand chevrons to point down */
-            .chevron-icon { transform: rotate(90deg) !important; }
-
-            /* Progress bar — use border trick since bg colors may not print */
             .progress-bar { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-
             body { font-size: 11px; }
         }
-
-        /* Hidden outside print */
         .print-title { display: none; }
     </style>
 
@@ -180,17 +158,18 @@
                                 <th class="px-4 py-3 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">Progress</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-50" x-data="{ open: null }">
+                        {{-- closed = Set of collapsed indices; starts empty so all are open --}}
+                        <tbody class="divide-y divide-gray-50" x-data="{ closed: new Set() }">
                             @foreach ($projects as $index => $project)
                                 @php $pct = $project['total'] > 0 ? round($project['done'] / $project['total'] * 100) : 0; @endphp
 
                                 {{-- Project Row --}}
                                 <tr class="hover:bg-gray-50 cursor-pointer transition-colors"
-                                    @click="open = (open === {{ $index }}) ? null : {{ $index }}">
+                                    @click="closed.has({{ $index }}) ? closed.delete({{ $index }}) : closed.add({{ $index }}); closed = new Set(closed)">
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
-                                            <svg class="w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200 chevron-icon no-print"
-                                                :class="open === {{ $index }} ? 'rotate-90' : ''"
+                                            <svg class="w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200 no-print"
+                                                :class="closed.has({{ $index }}) ? '' : 'rotate-90'"
                                                 fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                                             </svg>
@@ -253,8 +232,8 @@
                                     </td>
                                 </tr>
 
-                                {{-- Expanded Task List — always visible in print --}}
-                                <tr x-show="open === {{ $index }}" x-cloak class="print-accordion-row">
+                                {{-- Task rows: visible by default, hidden only when user collapses --}}
+                                <tr x-show="!closed.has({{ $index }})">
                                     <td colspan="7" class="px-0 py-0 bg-gray-50">
                                         <div class="border-t border-b border-gray-100">
                                             <table class="min-w-full">
@@ -317,17 +296,7 @@
 
     <script>
         function exportPDF() {
-            // Before printing: force-show all accordion rows
-            document.querySelectorAll('.print-accordion-row').forEach(el => {
-                el.style.display = 'table-row';
-            });
-
             window.print();
-
-            // After print dialog closes: restore Alpine.js driven visibility
-            document.querySelectorAll('.print-accordion-row').forEach(el => {
-                el.style.display = '';
-            });
         }
     </script>
 </x-app-layout>
