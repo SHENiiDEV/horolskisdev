@@ -82,14 +82,25 @@
                     <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-lg font-medium text-gray-900">Associated Projects</h3>
-                            @if($plugin->revert_endpoint)
-                            <form action="{{ route('plugins.revertAll', $plugin) }}" method="POST" onsubmit="return confirm('Are you sure you want to trigger a revert on all associated projects?');">
-                                @csrf
-                                <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 text-xs rounded-md shadow-sm">
-                                    Revert All Projects
-                                </button>
-                            </form>
-                            @endif
+                            <div class="flex items-center gap-2">
+                                @if($plugin->enable_auto_update && $plugin->update_endpoint)
+                                <form action="{{ route('plugins.updateAllProjects', $plugin) }}" method="POST" onsubmit="return confirm('Are you sure you want to force an update on all associated projects?');">
+                                    @csrf
+                                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 text-xs rounded-md shadow-sm">
+                                        Update All Projects
+                                    </button>
+                                </form>
+                                @endif
+
+                                @if($plugin->revert_endpoint)
+                                <form action="{{ route('plugins.revertAll', $plugin) }}" method="POST" onsubmit="return confirm('Are you sure you want to trigger a revert on all associated projects?');">
+                                    @csrf
+                                    <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 text-xs rounded-md shadow-sm">
+                                        Revert All Projects
+                                    </button>
+                                </form>
+                                @endif
+                            </div>
                         </div>
 
                     <ul class="divide-y divide-gray-200 mb-6">

@@ -128,6 +128,17 @@ class PluginController extends Controller
         return back()->with('success', 'Revert job dispatched for all projects.');
     }
 
+    public function updateAllProjects(Plugin $plugin)
+    {
+        if (!$plugin->enable_auto_update || !$plugin->update_endpoint) {
+            return back()->with('error', 'Auto-update is not fully configured for this plugin.');
+        }
+
+        \App\Jobs\PushPluginUpdateJob::dispatch($plugin);
+
+        return back()->with('success', 'Update job dispatched for all projects.');
+    }
+
     public function assignToProject(Request $request, Plugin $plugin)
     {
         $request->validate([
