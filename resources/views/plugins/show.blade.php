@@ -1,8 +1,16 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ $plugin->name }}
-        </h2>
+        <div class="flex justify-between items-center">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ $plugin->name }}
+            </h2>
+            <form action="{{ route('plugins.processQueue') }}" method="POST">
+                @csrf
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 text-sm rounded-md shadow-sm font-medium">
+                    Run Worker (Process Queue)
+                </button>
+            </form>
+        </div>
     </x-slot>
 
     <div class="py-12">

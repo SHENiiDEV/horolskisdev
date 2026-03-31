@@ -59,6 +59,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/search', [\App\Http\Controllers\SearchController::class, 'index'])->name('search');
 
     // Plugins
+    Route::post('plugins/process-queue', [\App\Http\Controllers\PluginController::class, 'processQueue'])->name('plugins.processQueue');
     Route::resource('plugins', \App\Http\Controllers\PluginController::class);
     Route::post('plugins/{plugin}/version', [\App\Http\Controllers\PluginController::class, 'uploadVersion'])->name('plugins.uploadVersion');
     Route::post('plugins/{plugin}/update-all', [\App\Http\Controllers\PluginController::class, 'updateAllProjects'])->name('plugins.updateAllProjects');

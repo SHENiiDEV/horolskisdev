@@ -139,6 +139,17 @@ class PluginController extends Controller
         return back()->with('success', 'Update job dispatched for all projects.');
     }
 
+    public function processQueue()
+    {
+        try {
+            set_time_limit(300);
+            \Illuminate\Support\Facades\Artisan::call('queue:work', ['--stop-when-empty' => true]);
+            return back()->with('success', 'Background queue processed successfully.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error processing queue: ' . $e->getMessage());
+        }
+    }
+
     public function assignToProject(Request $request, Plugin $plugin)
     {
         $request->validate([
