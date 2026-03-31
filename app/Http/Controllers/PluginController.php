@@ -37,13 +37,21 @@ class PluginController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'version' => 'required|string|max:50',
-            'file' => 'required|file|mimes:zip,model,json', // Adjust mimes as needed for plugins
+            'file' => 'required|file', // Removed mimes to avoid issues, or can keep original
             'changelog' => 'nullable|string',
+            'enable_auto_update' => 'nullable|boolean',
+            'update_endpoint' => 'nullable|string|max:255',
+            'revert_endpoint' => 'nullable|string|max:255',
+            'update_secret_key' => 'nullable|string|max:255',
         ]);
 
         $plugin = Plugin::create([
             'name' => $request->name,
             'description' => $request->description,
+            'enable_auto_update' => $request->boolean('enable_auto_update'),
+            'update_endpoint' => $request->update_endpoint,
+            'revert_endpoint' => $request->revert_endpoint,
+            'update_secret_key' => $request->update_secret_key,
         ]);
 
         $path = $request->file('file')->store('plugins');
@@ -63,6 +71,29 @@ class PluginController extends Controller
         return view('plugins.show', compact('plugin'));
     }
 
+    public function update(Request $request, Plugin $plugin)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'enable_auto_update' => 'nullable|boolean',
+            'update_endpoint' => 'nullable|string|max:255',
+            'revert_endpoint' => 'nullable|string|max:255',
+            'update_secret_key' => 'nullable|string|max:255',
+        ]);
+
+        $plugin->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'enable_auto_update' => $request->boolean('enable_auto_update'),
+            'update_endpoint' => $request->update_endpoint,
+            'revert_endpoint' => $request->revert_endpoint,
+            'update_secret_key' => $request->update_secret_key,
+        ]);
+
+        return back()->with('success', 'Plugin updated successfully.');
+    }
+
     public function uploadVersion(Request $request, Plugin $plugin)
     {
         $request->validate([
@@ -79,7 +110,22 @@ class PluginController extends Controller
             'changelog' => $request->changelog,
         ]);
 
+        if ($plugin->enable_auto_update) {
+            \App\Jobs\PushPluginUpdateJob::dispatch($plugin);
+        }
+
         return back()->with('success', 'New version uploaded.');
+    }
+
+    public function revertAll(Plugin $plugin)
+    {
+        if (!$plugin->revert_endpoint) {
+            return back()->with('error', 'Revert endpoint is not configured for this plugin.');
+        }
+
+        \App\Jobs\PushPluginRevertJob::dispatch($plugin);
+
+        return back()->with('success', 'Revert job dispatched for all projects.');
     }
 
     public function assignToProject(Request $request, Plugin $plugin)

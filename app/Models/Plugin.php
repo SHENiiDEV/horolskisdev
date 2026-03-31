@@ -10,6 +10,10 @@ class Plugin extends Model
 {
     protected $guarded = [];
 
+    protected $casts = [
+        'enable_auto_update' => 'boolean',
+    ];
+
     public function versions(): HasMany
     {
         return $this->hasMany(PluginVersion::class)->orderBy('created_at', 'desc');

@@ -48,6 +48,39 @@
                                 rows="3">{{ old('changelog') }}</textarea>
                         </div>
 
+                        <div class="border-t border-gray-200 pt-4 mt-2">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('Auto Update Settings') }}</h3>
+                            
+                            <div class="mb-4">
+                                <label for="enable_auto_update" class="inline-flex items-center">
+                                    <input id="enable_auto_update" type="checkbox" name="enable_auto_update" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" {{ old('enable_auto_update') ? 'checked' : '' }}>
+                                    <span class="ml-2 text-sm text-gray-600">{{ __('Enable Auto Update') }}</span>
+                                </label>
+                                <p class="text-xs text-gray-500 mt-1">If enabled, uploading a new version will trigger an update request to associated projects.</p>
+                            </div>
+
+                            <div class="mb-4">
+                                <x-input-label for="update_endpoint" :value="__('Update Endpoint')" />
+                                <x-text-input id="update_endpoint" class="block mt-1 w-full" type="text" name="update_endpoint"
+                                    :value="old('update_endpoint')" placeholder="e.g. wp-json/my-plugin/v1/update" />
+                                <x-input-error :messages="$errors->get('update_endpoint')" class="mt-2" />
+                            </div>
+
+                            <div class="mb-4">
+                                <x-input-label for="revert_endpoint" :value="__('Revert Endpoint')" />
+                                <x-text-input id="revert_endpoint" class="block mt-1 w-full" type="text" name="revert_endpoint"
+                                    :value="old('revert_endpoint')" placeholder="e.g. wp-json/my-plugin/v1/revert" />
+                                <x-input-error :messages="$errors->get('revert_endpoint')" class="mt-2" />
+                            </div>
+
+                            <div class="mb-4">
+                                <x-input-label for="update_secret_key" :value="__('Update Secret Key / Token')" />
+                                <x-text-input id="update_secret_key" class="block mt-1 w-full" type="text" name="update_secret_key"
+                                    :value="old('update_secret_key')" placeholder="e.g. SHA_API_KEY" />
+                                <x-input-error :messages="$errors->get('update_secret_key')" class="mt-2" />
+                            </div>
+                        </div>
+
                         <div class="flex items-center gap-4">
                             <x-primary-button>{{ __('Upload Plugin') }}</x-primary-button>
                             <a href="{{ route('plugins.index') }}" class="text-gray-600 hover:text-gray-900">Cancel</a>
