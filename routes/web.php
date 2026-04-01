@@ -67,6 +67,7 @@ Route::middleware('auth')->group(function () {
     Route::post('plugins/{plugin}/version', [\App\Http\Controllers\PluginController::class, 'uploadVersion'])->name('plugins.uploadVersion');
     Route::post('plugins/{plugin}/update-all', [\App\Http\Controllers\PluginController::class, 'updateAllProjects'])->name('plugins.updateAllProjects');
     Route::post('plugins/{plugin}/revert', [\App\Http\Controllers\PluginController::class, 'revertAll'])->name('plugins.revertAll');
+    Route::post('plugins/{plugin}/trigger-project/{project}', [\App\Http\Controllers\PluginController::class, 'triggerSingleProject'])->name('plugins.triggerProject');
     Route::post('plugins/{plugin}/assign', [\App\Http\Controllers\PluginController::class, 'assignToProject'])->name('plugins.assign');
     Route::post('projects/{project}/plugins/{plugin}/upgrade', [\App\Http\Controllers\PluginController::class, 'upgradeProjectPlugin'])->name('plugins.upgrade');
     Route::delete('projects/{project}/plugins/{plugin}', [\App\Http\Controllers\PluginController::class, 'removeProjectPlugin'])->name('plugins.remove');

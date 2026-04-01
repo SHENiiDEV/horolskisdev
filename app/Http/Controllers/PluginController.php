@@ -143,6 +143,47 @@ class PluginController extends Controller
         return back()->with('success', 'Update job dispatched for all projects.');
     }
 
+    public function triggerSingleProject(Request $request, Plugin $plugin, \App\Models\Project $project)
+    {
+        $action = $request->input('action', 'update');
+        $endpointPath = $action === 'revert' ? $plugin->revert_endpoint : $plugin->update_endpoint;
+
+        if (!$endpointPath) {
+            return response()->json(['success' => false, 'message' => 'Endpoint not configured'], 400);
+        }
+
+        if (empty($project->domain)) {
+            return response()->json(['success' => false, 'message' => 'Project has no domain'], 400);
+        }
+
+        $domain = rtrim(str_replace(['http://', 'https://'], '', $project->domain), '/');
+        $url = 'https://' . $domain . '/' . ltrim($endpointPath, '/');
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::timeout(30)
+                ->withToken($plugin->update_secret_key)
+                ->post($url, [
+                    'action' => $action,
+                    'folder_name' => $plugin->folder_name,
+                ]);
+
+            if ($response->successful()) {
+                return response()->json(['success' => true]);
+            }
+
+            return response()->json([
+                'success' => false, 
+                'message' => 'HTTP ' . $response->status()
+            ], $response->status() >= 400 ? $response->status() : 400);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false, 
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function processQueue()
     {
         try {
