@@ -16,6 +16,9 @@ Route::get('/', function () {
     return redirect()->route('dashboard');
 });
 
+// Public API Endpoints
+Route::get('/api/plugins/download', [\App\Http\Controllers\PluginApiController::class, 'download'])->name('api.plugins.download');
+
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::middleware(['auth', 'admin'])->group(function () {

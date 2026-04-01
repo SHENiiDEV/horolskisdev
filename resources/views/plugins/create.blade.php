@@ -52,6 +52,14 @@
                             <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('Auto Update Settings') }}</h3>
                             
                             <div class="mb-4">
+                                <x-input-label for="folder_name" :value="__('Plugin Folder Name')" />
+                                <x-text-input id="folder_name" class="block mt-1 w-full" type="text" name="folder_name"
+                                    :value="old('folder_name')" placeholder="e.g. advanced-custom-fields-pro" />
+                                <p class="text-xs text-gray-500 mt-1">Exact name of the plugin's folder on WordPress sites. Used for downloading updates publicly.</p>
+                                <x-input-error :messages="$errors->get('folder_name')" class="mt-2" />
+                            </div>
+                            
+                            <div class="mb-4">
                                 <label for="enable_auto_update" class="inline-flex items-center">
                                     <input id="enable_auto_update" type="checkbox" name="enable_auto_update" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" {{ old('enable_auto_update') ? 'checked' : '' }}>
                                     <span class="ml-2 text-sm text-gray-600">{{ __('Enable Auto Update') }}</span>

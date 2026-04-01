@@ -53,7 +53,10 @@ class PushPluginRevertJob implements ShouldQueue
                 // We use synchronous HTTP POST so it waits for an OK response before going to next
                 $response = Http::timeout(10)
                     ->withToken($secretKey)
-                    ->post($url);
+                    ->post($url, [
+                        'action' => 'revert',
+                        'folder_name' => $this->plugin->folder_name,
+                    ]);
 
                 if (!$response->successful()) {
                     Log::warning("Failed to auto-revert plugin {$this->plugin->name} on project {$project->name}. Status: {$response->status()}", [

@@ -51,7 +51,10 @@ class PushPluginUpdateJob implements ShouldQueue
             try {
                 $response = Http::timeout(10)
                     ->withToken($secretKey)
-                    ->post($url);
+                    ->post($url, [
+                        'action' => 'update',
+                        'folder_name' => $this->plugin->folder_name,
+                    ]);
 
                 if (!$response->successful()) {
                     Log::warning("Failed to auto-update plugin {$this->plugin->name} on project {$project->name}. Status: {$response->status()}", [

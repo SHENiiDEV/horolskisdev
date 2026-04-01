@@ -43,11 +43,13 @@ class PluginController extends Controller
             'update_endpoint' => 'nullable|string|max:255',
             'revert_endpoint' => 'nullable|string|max:255',
             'update_secret_key' => 'nullable|string|max:255',
+            'folder_name' => 'nullable|string|max:255|unique:plugins,folder_name',
         ]);
 
         $plugin = Plugin::create([
             'name' => $request->name,
             'description' => $request->description,
+            'folder_name' => $request->folder_name,
             'enable_auto_update' => $request->boolean('enable_auto_update'),
             'update_endpoint' => $request->update_endpoint,
             'revert_endpoint' => $request->revert_endpoint,
@@ -80,11 +82,13 @@ class PluginController extends Controller
             'update_endpoint' => 'nullable|string|max:255',
             'revert_endpoint' => 'nullable|string|max:255',
             'update_secret_key' => 'nullable|string|max:255',
+            'folder_name' => 'nullable|string|max:255|unique:plugins,folder_name,' . $plugin->id,
         ]);
 
         $plugin->update([
             'name' => $request->name,
             'description' => $request->description,
+            'folder_name' => $request->folder_name,
             'enable_auto_update' => $request->boolean('enable_auto_update'),
             'update_endpoint' => $request->update_endpoint,
             'revert_endpoint' => $request->revert_endpoint,
