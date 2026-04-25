@@ -24,11 +24,18 @@ class RolePermissionSeeder extends Seeder
             'manage-clients',
             'view-projects',
             'manage-projects',
+            'view-invoices',
             'view-kanban',
             'view-time-tracker',
+            'view-telegram',
+            'view-analytics',
+            'view-task-progress',
             'view-plugins',
             'manage-plugins',
+            'view-server-status',
+            'view-logs',
             'manage-rbac',
+            'view-users',
         ];
 
         foreach ($permissions as $permission) {
@@ -44,15 +51,21 @@ class RolePermissionSeeder extends Seeder
             'view-dashboard',
             'view-clients',
             'view-projects',
+            'view-invoices',
             'view-kanban',
             'view-time-tracker',
+            'view-telegram',
+            'view-analytics',
+            'view-task-progress',
             'view-plugins',
+            'view-server-status',
         ]);
 
         $clientRole = Role::firstOrCreate(['name' => 'client']);
         $clientRole->syncPermissions([
             'view-dashboard',
             'view-projects',
+            'view-invoices',
             'view-kanban',
             'view-time-tracker',
         ]);
