@@ -91,12 +91,12 @@ class DashboardController extends Controller
 
         $applyDateFilter($completedUnpaidTasksQuery, 'updated_at');
 
-        // 3. Potential Earnings (Pending or In Progress)
-        // Filter by created_at? 
         $potentialQuery = \App\Models\Task::whereIn('status', ['pending', 'in_progress'])
             ->with('timeEntries');
 
-        $applyDateFilter($potentialQuery, 'created_at');
+        if ($endDate) {
+            $potentialQuery->where('created_at', '<=', $endDate);
+        }
 
         if ($isClient) {
             $paidTasksQuery->whereHas('project', function ($q) use ($clientId) {

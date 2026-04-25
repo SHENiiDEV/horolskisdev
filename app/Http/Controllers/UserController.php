@@ -27,13 +27,14 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'role' => 'required|in:admin,client',
+            'role' => 'required|in:admin,manager,client',
             'client_id' => 'nullable|exists:clients,id',
         ]);
 
         $validated['password'] = \Illuminate\Support\Facades\Hash::make($validated['password']);
 
-        \App\Models\User::create($validated);
+        $user = \App\Models\User::create($validated);
+        $user->assignRole($validated['role']);
 
         return redirect()->route('users.index')->with('success', 'User created successfully.');
     }
@@ -53,7 +54,8 @@ class UserController extends Controller
     {
         $user = \App\Models\User::findOrFail($id);
         $clients = \App\Models\Client::all();
-        return view('users.edit', compact('user', 'clients'));
+        $roles = ['admin', 'manager', 'client'];
+        return view('users.edit', compact('user', 'clients', 'roles'));
     }
 
     /**
@@ -67,7 +69,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8',
-            'role' => 'required|in:admin,client',
+            'role' => 'required|in:admin,manager,client',
             'client_id' => 'nullable|exists:clients,id',
         ]);
 
@@ -78,6 +80,7 @@ class UserController extends Controller
         }
 
         $user->update($validated);
+        $user->syncRoles([$validated['role']]);
 
         return redirect()->route('users.index')->with('success', 'User updated successfully.');
     }

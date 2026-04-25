@@ -12,30 +12,47 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    <a href="{{ route('dashboard') }}"
-                        class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('dashboard') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }} text-sm font-medium leading-5 transition duration-150 ease-in-out">
-                        Dashboard
-                    </a>
-                    <a href="{{ route('clients.index') }}"
-                        class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('clients.*') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }} text-sm font-medium leading-5 transition duration-150 ease-in-out">
-                        Clients
-                    </a>
-                    <a href="{{ route('projects.index') }}"
-                        class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('projects.*') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }} text-sm font-medium leading-5 transition duration-150 ease-in-out">
-                        Projects
-                    </a>
-                    <a href="{{ route('tasks.kanban') }}"
-                        class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('tasks.kanban') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }} text-sm font-medium leading-5 transition duration-150 ease-in-out">
-                        Kanban
-                    </a>
-                    <a href="{{ route('time-entries.index') }}"
-                        class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('time-entries.*') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }} text-sm font-medium leading-5 transition duration-150 ease-in-out">
-                        Time Tracker
-                    </a>
-                    <a href="{{ route('plugins.index') }}"
-                        class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('plugins.*') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }} text-sm font-medium leading-5 transition duration-150 ease-in-out">
-                        Plugins
-                    </a>
+                    @can('view-dashboard')
+                        <a href="{{ route('dashboard') }}"
+                            class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('dashboard') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }} text-sm font-medium leading-5 transition duration-150 ease-in-out">
+                            Dashboard
+                        </a>
+                    @endcan
+
+                    @can('view-clients')
+                        <a href="{{ route('clients.index') }}"
+                            class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('clients.*') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }} text-sm font-medium leading-5 transition duration-150 ease-in-out">
+                            Clients
+                        </a>
+                    @endcan
+
+                    @can('view-projects')
+                        <a href="{{ route('projects.index') }}"
+                            class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('projects.*') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }} text-sm font-medium leading-5 transition duration-150 ease-in-out">
+                            Projects
+                        </a>
+                    @endcan
+
+                    @can('view-kanban')
+                        <a href="{{ route('tasks.kanban') }}"
+                            class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('tasks.kanban') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }} text-sm font-medium leading-5 transition duration-150 ease-in-out">
+                            Kanban
+                        </a>
+                    @endcan
+
+                    @can('view-time-tracker')
+                        <a href="{{ route('time-entries.index') }}"
+                            class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('time-entries.*') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }} text-sm font-medium leading-5 transition duration-150 ease-in-out">
+                            Time Tracker
+                        </a>
+                    @endcan
+
+                    @can('view-plugins')
+                        <a href="{{ route('plugins.index') }}"
+                            class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('plugins.*') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }} text-sm font-medium leading-5 transition duration-150 ease-in-out">
+                            Plugins
+                        </a>
+                    @endcan
                 </div>
             </div>
 
