@@ -55,7 +55,8 @@ class UserController extends Controller
         $user = \App\Models\User::findOrFail($id);
         $clients = \App\Models\Client::all();
         $roles = ['admin', 'manager', 'client'];
-        return view('users.edit', compact('user', 'clients', 'roles'));
+        $permissions = \Spatie\Permission\Models\Permission::all();
+        return view('users.edit', compact('user', 'clients', 'roles', 'permissions'));
     }
 
     /**
@@ -81,6 +82,13 @@ class UserController extends Controller
 
         $user->update($validated);
         $user->syncRoles([$validated['role']]);
+
+        // Sync granular permissions if provided
+        if ($request->has('permissions')) {
+            $user->syncPermissions($request->input('permissions'));
+        } else {
+            $user->syncPermissions([]);
+        }
 
         return redirect()->route('users.index')->with('success', 'User updated successfully.');
     }

@@ -116,6 +116,25 @@
                                 </div>
                                 <x-input-error :messages="$errors->get('client_id')" class="mt-2" />
                             </div>
+
+                            <div class="col-span-full">
+                                <label class="block text-sm font-medium leading-6 text-gray-900 mb-4">Granular Permissions</label>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    @foreach($permissions as $permission)
+                                        <div class="relative flex items-start">
+                                            <div class="flex h-6 items-center">
+                                                <input id="permission_{{ $permission->id }}" name="permissions[]" value="{{ $permission->name }}" type="checkbox"
+                                                    {{ $user->hasDirectPermission($permission->name) ? 'checked' : '' }}
+                                                    class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                                            </div>
+                                            <div class="ml-3 text-sm leading-6">
+                                                <label for="permission_{{ $permission->id }}" class="font-medium text-gray-900">{{ str_replace('-', ' ', ucfirst($permission->name)) }}</label>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <p class="mt-4 text-xs text-gray-500 italic">Note: Permissions assigned directly to the user will override or supplement their Role based permissions.</p>
+                            </div>
                         </div>
                     </div>
 
